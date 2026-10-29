@@ -3,96 +3,254 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ESCAPE TERMINAL v39</title>
-<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<title>ESCAPE TERMINAL v54</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-:root{--bg-color:#0d0d0d;--panel-bg:#151515;--border-color:#333;--text-main:#c4c4c4;--text-muted:#6e6e6e;
---accent-green:#4b6a48;--accent-red:#8b2222;--accent-yellow:#b8860b;--accent-blue:#3d5c6b}
-*{box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent}
-body{background:#0d0d0d;background-image:repeating-linear-gradient(45deg,#111 0,#111 2px,transparent 2px,transparent 8px),linear-gradient(#000,#000);
-color:var(--text-main);font-family:'VT323',monospace;font-size:18px;margin:0;padding:15px;display:flex;justify-content:center;min-height:100vh}
-.container{width:100%;max-width:600px;display:flex;flex-direction:column;}
-.metal-panel{background:var(--panel-bg);border:2px solid var(--border-color);border-radius:4px;padding:15px;margin-bottom:15px;
-box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relative}
-.metal-panel::after{content:'';position:absolute;top:2px;left:2px;right:2px;bottom:2px;border:1px solid rgba(255,255,255,.03);pointer-events:none;border-radius:2px}
-#auth-screen{display:flex;flex-direction:column;gap:15px;margin-top:10vh;}
-#auth-screen h1{text-align:center;color:var(--accent-yellow);text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;border-bottom:2px dashed var(--border-color);padding-bottom:10px;font-size:24px;}
-.input-group label{display:block;color:var(--text-muted);text-transform:uppercase;font-size:16px;margin-bottom:4px}
-.input-group input{width:100%;background:#050505;border:1px solid #444;color:var(--accent-green);padding:12px;font-family:'VT323',monospace;font-size:20px;outline:none;border-radius:4px;transition:0.2s;}
-.input-group input:focus{border-color:var(--accent-green);box-shadow:0 0 8px rgba(75,106,72,0.6);}
-.btn{font-family:'VT323',monospace;font-size:20px;text-transform:uppercase;padding:12px 15px;cursor:pointer;border:2px solid #000;border-radius:4px;transition:0.1s;text-align:center;color:#eee;display:flex;justify-content:center;align-items:center;gap:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #000;}
-.btn:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0px 0 #000;}
-.btn:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(1);transform:none;box-shadow:none;}
-.btn-primary{background:var(--accent-green)}.btn-danger{background:var(--accent-red)}.btn-warning{background:var(--accent-yellow);color:#000}.btn-info{background:var(--accent-blue)}
-.btn.active-goal { border: 3px solid var(--accent-yellow); box-shadow: inset 0 0 15px rgba(184,134,11,0.8), 0 3px 0 #000; background: #5a4a00; color: #fff; }
-.btn-full{width:100%;margin-bottom:10px}
-.btn-row{display:flex;gap:10px;margin-bottom:10px}.btn-row .btn{flex:1}
-.btn.sm{font-size:16px;padding:8px 4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 2px 0 #000;}
-.btn.sm:active{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0px 0 #000;}
-.panel-title{background:#0a0a0a;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;padding:6px 10px;border-bottom:2px solid var(--border-color);margin:-15px -15px 15px -15px;font-size:16px;display:flex;justify-content:space-between;align-items:center;border-radius:2px 2px 0 0;}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat-box{background:#0a0a0a;border:1px solid var(--border-color);padding:10px;text-align:center;border-radius:4px;}
-.stat-label{font-size:14px;color:var(--text-muted);text-transform:uppercase}
-.stat-val{font-size:28px;color:#fff;line-height:1;margin-top:6px;text-shadow:0 0 5px rgba(255,255,255,0.3);}
-.stat-box.highlight .stat-val{color:var(--accent-yellow);text-shadow:0 0 8px rgba(184,134,11,0.5);}
-.stat-box.run .stat-val{color:var(--accent-green);text-shadow:0 0 8px rgba(75,106,72,0.5);}
-.stat-box.boss .stat-val{color:var(--accent-red);text-shadow:0 0 8px rgba(139,34,34,0.5);}
-.progress-container{background:#000;border:1px solid var(--border-color);height:24px;margin-bottom:15px;position:relative;display:none;border-radius:4px;overflow:hidden;}
-.progress-bar{background:linear-gradient(90deg,var(--accent-green),var(--accent-yellow));height:100%;width:0%;transition:width .3s}
-.progress-text{position:absolute;inset:0;text-align:center;color:#fff;font-size:16px;line-height:22px;text-shadow:1px 1px 0 #000,0 0 3px #000;font-weight:bold}
-.batch-input{display:flex;align-items:center;gap:10px;background:#0a0a0a;padding:8px;border:1px solid var(--border-color);margin-bottom:15px;border-radius:4px;}
-.batch-input input{width:70px;background:#111;border:1px solid #333;color:var(--accent-yellow);font-family:'VT323',monospace;font-size:22px;text-align:center;padding:8px;outline:none;border-radius:4px;}
-.loot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.loot-item{background:#111;border:1px solid #222;padding:8px 4px;text-align:center;font-size:14px;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;}
-.loot-item b{font-size:18px;color:#fff;margin-top:4px;font-weight:normal;}
-#log-box{background:#000;border:2px solid #222;padding:10px;height:180px;overflow-y:auto;font-size:15px;line-height:1.3;color:#4af626;box-shadow:inset 0 0 20px rgba(74,246,38,.1);border-radius:4px;}
-#log-box::-webkit-scrollbar{width:6px}#log-box::-webkit-scrollbar-thumb{background:#333;border-radius:3px;}
-.log-time{color:#2e8b57;margin-right:5px}.log-error{color:#ff4444}.log-warn{color:#ffbb33}.log-success{color:#4af626}
-.status-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:14px;letter-spacing:1px;font-weight:bold;}
-.status-run{background:var(--accent-green);color:#fff;box-shadow:0 0 8px var(--accent-green);}
-.status-pause{background:var(--accent-yellow);color:#000;box-shadow:0 0 8px var(--accent-yellow);}
-.status-stop{background:var(--accent-red);color:#fff;box-shadow:0 0 8px var(--accent-red);}
+:root {
+    --bg-color: #0d0f12;
+    --panel-bg: linear-gradient(180deg, #1b1e26 0%, #12141a 100%);
+    --border-color: #2d3340;
+    --text-main: #a0aab8;
+    --text-muted: #627080;
+    --accent-green: #5cb85c;
+    --accent-red: #d9534f;
+    --accent-yellow: #f0ad4e;
+    --accent-blue: #337ab7;
+}
+* { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+body {
+    background-color: var(--bg-color);
+    background-image: repeating-linear-gradient(45deg, #15181e 0, #15181e 1px, transparent 1px, transparent 6px);
+    color: var(--text-main);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    margin: 0;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+h1, .panel-title, .stat-label, .btn, .status-badge, .log-time { font-family: 'VT323', monospace; }
+.container { width: 100%; max-width: 600px; display: flex; flex-direction: column; overflow: hidden; }
+.metal-panel {
+    background: var(--panel-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 10px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+.metal-panel::after {
+    content: ''; position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.02); pointer-events: none; border-radius: 4px;
+}
+#auth-screen { display: flex; flex-direction: column; gap: 15px; margin-top: 10vh; }
+#auth-screen h1 { text-align: center; color: var(--accent-yellow); text-transform: uppercase; letter-spacing: 3px; margin: 0 0 10px; border-bottom: 2px dashed var(--border-color); padding-bottom: 10px; font-size: 28px; text-shadow: 0 0 8px rgba(240, 173, 78, 0.4); }
+.input-group label { display: block; color: var(--text-muted); text-transform: uppercase; font-size: 16px; margin-bottom: 4px; letter-spacing: 1px; }
+.input-group input {
+    width: 100%; background: #0a0b0e; border: 1px solid #3a4150; color: #fff;
+    padding: 12px; font-family: 'Share Tech Mono', monospace; font-size: 18px;
+    outline: none; border-radius: 4px; transition: 0.2s;
+}
+.input-group input:focus { border-color: var(--accent-green); box-shadow: 0 0 8px rgba(92, 184, 92, 0.4); }
+.btn {
+    font-size: 18px; text-transform: uppercase; padding: 10px 12px; cursor: pointer;
+    border: 2px solid #000; border-radius: 6px; transition: 0.1s;
+    text-align: center; color: #eee; display: flex; justify-content: center; align-items: center; gap: 5px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 3px 0 #000;
+    letter-spacing: 1px;
+}
+.btn:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0px 0 #000; }
+.btn:disabled { opacity: .5; cursor: not-allowed; filter: grayscale(1); transform: none; box-shadow: none; }
+.btn-primary { background: linear-gradient(180deg, #4b8e4b, #2e5e2e); border-color: #1e3e1e; }
+.btn-danger { background: linear-gradient(180deg, #b74b47, #7a2a26); border-color: #4a1714; }
+.btn-warning { background: linear-gradient(180deg, #d49a40, #9e6d1e); border-color: #5e400a; color: #fff; }
+.btn-info { background: linear-gradient(180deg, #3a7ca5, #235271); border-color: #122b3b; }
+.btn.active-goal { border: 2px solid var(--accent-yellow); box-shadow: inset 0 0 15px rgba(240, 173, 78, 0.5), 0 3px 0 #000; background: #5a4a00; color: #fff; }
+.btn.active-cfg { border: 2px solid var(--accent-yellow); box-shadow: inset 0 0 10px rgba(240, 173, 78, 0.5); background: #5a4a00; color: #fff; }
+.btn-full { width: 100%; margin-bottom: 8px; }
+.btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.btn-row .btn { flex: 1; }
+.btn.sm { font-size: 14px; padding: 6px 2px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 2px 0 #000; }
+.btn.sm:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0px 0 #000; }
+.panel-title {
+    background: #0a0b0e; color: var(--accent-yellow);
+    text-transform: uppercase; letter-spacing: 2px; padding: 6px 10px;
+    border-bottom: 2px solid var(--border-color); margin: -12px -12px 12px -12px;
+    font-size: 16px; display: flex; justify-content: space-between; align-items: center;
+    border-radius: 4px 4px 0 0; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-box { background: #0a0b0e; border: 1px solid #2a303d; padding: 8px 6px; text-align: center; border-radius: 6px; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5); min-width: 0; }
+.stat-label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-val { font-size: 20px; color: #fff; line-height: 1.2; margin-top: 6px; text-shadow: 0 0 8px rgba(255, 255, 255, 0.2); font-family: 'Share Tech Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-box.highlight .stat-val { color: var(--accent-yellow); text-shadow: 0 0 8px rgba(240, 173, 78, 0.4); }
+.stat-box.run .stat-val { color: var(--accent-green); text-shadow: 0 0 8px rgba(92, 184, 92, 0.4); }
+.stat-box.boss .stat-val { color: var(--accent-red); text-shadow: 0 0 8px rgba(217, 83, 79, 0.4); }
+.progress-container { background: #000; border: 1px solid var(--border-color); height: 20px; margin-bottom: 10px; position: relative; display: none; border-radius: 4px; overflow: hidden; }
+.progress-bar { background: linear-gradient(90deg, #2e5e2e, #d49a40); height: 100%; width: 0%; transition: width .3s; }
+.progress-text { position: absolute; inset: 0; text-align: center; color: #fff; font-size: 14px; line-height: 18px; text-shadow: 1px 1px 0 #000; font-weight: bold; }
+.batch-input { display: flex; align-items: center; gap: 8px; background: #0a0b0e; padding: 6px 8px; border: 1px solid var(--border-color); margin-bottom: 10px; border-radius: 6px; }
+.batch-input input {
+    width: 60px; background: #111318; border: 1px solid #333b4a; color: var(--accent-yellow);
+    font-family: 'Share Tech Mono', monospace; font-size: 18px; text-align: center; padding: 6px; outline: none; border-radius: 4px;
+}
+.loot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.loot-item {
+    background: #111318; border: 1px solid #252c38; padding: 8px 4px; text-align: center;
+    font-size: 12px; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 6px; min-width: 0; overflow: hidden;
+}
+.loot-item span { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; display: block; }
+.loot-item b { font-size: 14px; color: #fff; margin-top: 4px; font-weight: normal; font-family: 'Share Tech Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; display: block; }
+#log-box {
+    background: #08090b; border: 1px solid #252c38; padding: 10px;
+    height: 160px; overflow-y: auto; font-size: 14px; line-height: 1.4;
+    color: #6b8e23; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+    border-radius: 6px; font-family: 'Share Tech Mono', monospace;
+}
+#log-box::-webkit-scrollbar { width: 6px; }
+#log-box::-webkit-scrollbar-thumb { background: #333b4a; border-radius: 3px; }
+.log-time { color: #556b2f; margin-right: 6px; }
+.log-error { color: #ff5252; }
+.log-warn { color: #ffb142; }
+.log-success { color: #5cb85c; }
+.status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 14px; letter-spacing: 1px; font-weight: bold; text-shadow: none; }
+.status-run { background: var(--accent-green); color: #000; box-shadow: 0 0 10px var(--accent-green); }
+.status-pause { background: var(--accent-yellow); color: #000; box-shadow: 0 0 10px var(--accent-yellow); }
+.status-stop { background: var(--accent-red); color: #fff; box-shadow: 0 0 10px var(--accent-red); }
 
-.session-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; background: #111; padding: 10px; border: 1px solid #333; border-radius: 4px; }
-.sess-item { font-size: 14px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
-.sess-item b { color: var(--accent-green); font-size: 18px; margin-left: auto; text-shadow: 0 0 5px rgba(75,106,72,0.5); }
+/* Статистика сессии */
+.session-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.sess-card { display: flex; align-items: center; gap: 8px; background: #111318; border: 1px solid #252c38; padding: 8px; border-radius: 6px; }
+.sess-ico { font-size: 20px; filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.1)); }
+.sess-info { display: flex; flex-direction: column; min-width: 0; }
+.sess-info span { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sess-info b { font-size: 16px; color: #fff; font-family: 'Share Tech Mono', monospace; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sess-info b.hl { color: var(--accent-green); text-shadow: 0 0 6px rgba(92, 184, 92, 0.4); }
 
-.nickname-row { display: flex; justify-content: space-between; align-items: center; background: #0a0a0a; padding: 10px; border-radius: 4px; border: 1px solid #333; margin-bottom: 10px; }
-.nickname-row span { font-size: 20px; color: #fff; }
-.btn-edit { background: none; border: none; color: var(--accent-yellow); cursor: pointer; font-size: 18px; padding: 0 5px; }
+/* Итоги за день */
+.day-summary { margin-top: 8px; border-top: 1px dashed #252c38; padding-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.day-res-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; background: #111318; padding: 4px 8px; border-radius: 4px; border: 1px solid #252c38; min-width: 0; }
+.day-res-row span { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.day-res-row b { white-space: nowrap; font-family: 'Share Tech Mono', monospace; }
+.day-res-row b.plus { color: var(--accent-green); }
+.day-res-row b.minus { color: var(--accent-red); }
 
-.col-modal-bg { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px; }
-.col-modal-box { width:100%; max-width:450px; position:relative; max-height:85vh; overflow-y:auto; }
-.col-set { border:1px solid #333; padding:10px; margin-bottom:10px; background:#111; border-radius:4px; }
-.col-set b { color:#fff; font-size:18px; }
-.col-set span { font-size:14px; color:#aaa; display:block; margin:4px 0 8px; }
-.col-btn-row { display:flex; gap:5px; }
+.nickname-row { display: flex; justify-content: space-between; align-items: center; background: #0a0b0e; padding: 10px; border-radius: 6px; border: 1px solid #2a303d; margin-bottom: 8px; }
+.nickname-row span { font-size: 18px; color: #fff; font-family: 'VT323', monospace; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-edit { background: none; border: none; color: var(--accent-yellow); cursor: pointer; font-size: 18px; padding: 0 5px; transition: 0.2s; flex-shrink: 0; }
+.btn-edit:hover { transform: scale(1.1); }
+.col-modal-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5, 5, 8, 0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 10px; backdrop-filter: blur(2px); }
+.col-modal-box { width: 100%; max-width: 450px; position: relative; max-height: 85vh; overflow-y: auto; overflow-x: hidden; }
+.col-modal-box.wide { max-width: 700px; }
+.col-set { border: 1px solid #333b4a; padding: 10px; margin-bottom: 8px; background: #1b1e26; border-radius: 6px; }
+.col-set b { color: #fff; font-size: 16px; font-family: 'VT323', monospace; }
+.col-set span { font-size: 13px; color: #888; display: block; margin: 4px 0 8px; }
+.col-btn-row { display: flex; gap: 6px; }
+.rating-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #2a303d; font-size: 15px; min-width: 0; }
+.rating-row.me { background: rgba(240, 173, 78, 0.15); border-left: 3px solid var(--accent-yellow); font-weight: bold; }
+.rating-place { width: 30px; color: var(--text-muted); font-weight: bold; flex-shrink: 0; }
+.rating-name { flex: 1; color: #fff; padding-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rating-val { font-weight: bold; color: var(--accent-yellow); padding-left: 8px; font-family: 'Share Tech Mono', monospace; flex-shrink: 0; }
 
-.rating-row { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-bottom:1px solid #222; font-size:16px; }
-.rating-row.me { background: rgba(184,134,11,0.2); border-left:3px solid var(--accent-yellow); font-weight:bold; }
-.rating-place { width:30px; color:var(--text-muted); font-weight:bold; }
-.rating-name { flex:1; color:#fff; padding-left:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.rating-val { font-weight:bold; color:var(--accent-yellow); padding-left:10px; }
+/* Админ панель */
+#admin-stats {
+    position: fixed; bottom: 10px; right: 10px; background: rgba(10, 11, 14, 0.95); border: 1px solid #2a303d;
+    padding: 8px 10px; border-radius: 6px; font-size: 12px; color: var(--text-muted); z-index: 9999;
+    pointer-events: none; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8); line-height: 1.4; max-width: 240px; font-family: 'Share Tech Mono', monospace;
+}
+#admin-stats b { color: #fff; }
+#admin-stats .err { color: var(--accent-red); }
+#admin-stats .ping { color: var(--accent-yellow); }
+#admin-stats .rpm { color: var(--accent-green); }
+
+/* Расширенная статистика */
+.stats-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; font-family: 'Share Tech Mono', monospace; }
+.stats-table th, .stats-table td { border-bottom: 1px solid #2a303d; padding: 6px 8px; text-align: left; }
+.stats-table th { color: var(--accent-yellow); font-weight: bold; text-transform: uppercase; font-size: 12px; font-family: 'VT323', monospace; letter-spacing: 1px; }
+.stats-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.stats-table .err-col { color: var(--accent-red); }
+.stats-table .ok-col { color: var(--accent-green); }
+.stats-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+.stats-summary .stat-box { padding: 8px 6px; }
+.err-row { padding: 6px 8px; background: #1c1113; border-left: 3px solid var(--accent-red); margin-bottom: 4px; font-size: 12px; border-radius: 4px; font-family: 'Share Tech Mono', monospace; }
+.err-row .t { color: var(--text-muted); font-size: 11px; }
+.err-row .ep { color: var(--accent-yellow); font-size: 13px; }
+.err-row .msg { color: #ff8a80; display: block; margin-top: 2px; font-size: 11px; }
+.section-title { color: var(--accent-yellow); font-size: 16px; font-family: 'VT323', monospace; text-transform: uppercase; letter-spacing: 2px; margin: 12px 0 6px; border-bottom: 1px dashed #2a303d; padding-bottom: 4px; }
+
+/* Аккордеон для тактик */
+details.cfg-details { background: #111318; border: 1px solid #2a303d; border-radius: 6px; margin-bottom: 6px; padding: 0; overflow: hidden; }
+details.cfg-details summary { cursor: pointer; font-weight: bold; color: #fff; outline: none; padding: 10px; list-style: none; display: flex; justify-content: space-between; align-items: center; font-family: 'VT323', monospace; font-size: 16px; letter-spacing: 0.5px; }
+details.cfg-details summary::-webkit-details-marker { display: none; }
+details.cfg-details summary::after { content: '▼'; font-size: 12px; color: var(--text-muted); transition: 0.2s; }
+details.cfg-details[open] summary::after { transform: rotate(180deg); }
+details.cfg-details[open] summary { border-bottom: 1px dashed #2a303d; }
+.cfg-content { padding: 10px; }
+.cfg-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.cfg-desc { font-size: 13px; color: #888; background: #0a0b0e; padding: 8px; border-radius: 4px; border: 1px solid #252c38; line-height: 1.4; }
+.cfg-desc b { color: #fff; }
+
+/* ИСТОРИЯ ЗАБЕГОВ */
+.esc-modal-box.hist { width: min(96vw, 460px); max-height: 86vh; padding: 12px; overflow-x: hidden; }
+.esc-modal-title { font-size: 18px; font-weight: 900; text-align: center; color: #8b1a1a; letter-spacing: 1px; margin-bottom: 8px; font-family: 'VT323', monospace; }
+.esc-hist-tabs { display: flex; gap: 4px; margin: 0 0 8px; }
+.esc-hist-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 4px 5px; border-radius: 8px; border: 2px solid #8a6d45; background: linear-gradient(180deg, #efe0bb, #d4be8e); color: #5d3a00; font-weight: 900; font-size: 12px; cursor: pointer; line-height: 1.15; font-family: 'VT323', monospace; }
+.esc-hist-tab small { font-size: 10px; font-weight: 800; opacity: 0.75; }
+.esc-hist-tab.on { background: linear-gradient(180deg, #ffe082, #f6b300); border-color: #8a5a00; color: #3b2500; box-shadow: 0 2px 0 #5d3a00, inset 0 1px 0 rgba(255,255,255,0.5); }
+.esc-hist-sum { background: linear-gradient(180deg, #4a3420, #2c1c10); color: #f3e9d2; border-radius: 10px; padding: 8px 6px; margin-bottom: 8px; border: 1px solid #6b5129; font-family: 'Share Tech Mono', monospace; overflow: hidden; }
+.esc-hist-sum-top { font-size: 12px; font-weight: 700; margin-bottom: 6px; text-align: center; }
+.esc-hist-sum-top b { color: #ffe082; }
+.esc-hist-loot { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.esc-hist-bit { display: inline-flex; align-items: center; gap: 2px; background: rgba(0,0,0,0.28); border-radius: 6px; padding: 2px 6px 2px 4px; font-size: 11px; font-weight: 800; color: #f3e9d2; }
+.esc-hist-bit.plus b { color: #9dffb0; }
+.esc-hist-bit.minus b { color: #ffb4a8; }
+.esc-hist-card { background: linear-gradient(180deg, #f7edd0, #e2cc9a); border: 1px solid #c9b07a; border-radius: 10px; padding: 8px; margin-bottom: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.45); font-family: 'Share Tech Mono', monospace; color: #2b1d0a; overflow: hidden; }
+.esc-hist-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.esc-hist-km { font-weight: 900; font-size: 16px; letter-spacing: 0.5px; color: #2b1d0a; font-family: 'VT323', monospace; }
+.esc-hist-stop-pill { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; background: #6e1f16; color: #ffe0d4; font-size: 10px; font-weight: 900; letter-spacing: 0.2px; padding: 2px 6px 2px 3px; border-radius: 12px; border: 1px solid #c0392b; line-height: 1.2; }
+.esc-hist-squad { display: flex; gap: 4px; margin-bottom: 4px; flex-wrap: wrap; }
+.hist-squad-ava { width: 24px; height: 24px; border-radius: 50%; background: #8c7b5d; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; font-weight: bold; overflow: hidden; flex-shrink: 0; }
+.esc-hist-reason { font-size: 11px; font-weight: 700; color: #5d4a2a; margin: 4px 0; }
+.esc-hist-meta { font-size: 11px; font-weight: 700; color: #5c4630; margin: 4px 0; }
+.esc-hist-meta b { color: #2b1d0a; }
+.esc-hist-kills { display: flex; flex-wrap: wrap; gap: 6px 8px; justify-content: center; }
+.esc-hist-mob { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; width: 40px; cursor: pointer; position: relative; flex-shrink: 0; }
+.esc-hist-mob b { font-size: 11px; font-weight: 900; color: #2b1d0a; }
+.esc-hist-items { font-size: 11px; font-weight: 700; color: #6b3a00; margin-top: 6px; text-align: center; }
+.esc-hist-kills-label { font-size: 10px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase; color: #a08050; margin: 6px 0 4px; text-align: center; }
+.esc-hist-sum .esc-hist-kills-label { color: #d7c49e; }
 
 @media (max-width: 480px) {
-    body { padding: 10px; }
-    .metal-panel { padding: 12px; margin-bottom: 12px; }
-    .panel-title { margin: -12px -12px 12px -12px; padding: 4px 8px; font-size: 15px; }
-    .btn { font-size: 18px; padding: 10px; }
-    .btn.sm { font-size: 14px; padding: 6px 2px; }
-    .stat-val { font-size: 22px; }
-    .stat-label { font-size: 12px; }
-    .loot-item { font-size: 12px; padding: 6px 2px; }
-    .loot-item b { font-size: 16px; }
-    .btn-row { gap: 6px; margin-bottom: 6px; }
-    .batch-input { padding: 6px; gap: 6px; }
-    .batch-input input { width: 55px; font-size: 18px; padding: 6px; }
-    .batch-input .btn-warning { font-size: 16px; }
-    .stats-grid { gap: 6px; }
-    .stat-box { padding: 8px 4px; }
-    #auth-screen h1 { font-size: 20px; }
-    .session-stats { grid-template-columns: 1fr; }
-    .loot-grid { grid-template-columns: repeat(3, 1fr); }
+    body { padding: 8px; padding-bottom: 50px; }
+    .metal-panel { padding: 10px; margin-bottom: 10px; }
+    .panel-title { margin: -10px -10px 10px -10px; padding: 4px 8px; font-size: 14px; }
+    .btn { font-size: 16px; padding: 8px; }
+    .btn.sm { font-size: 13px; padding: 6px 2px; }
+    .stat-val { font-size: 18px; }
+    .stat-label { font-size: 11px; }
+    .loot-item { padding: 6px 2px; }
+    .loot-item span { font-size: 10px; }
+    .loot-item b { font-size: 13px; }
+    .btn-row { gap: 4px; margin-bottom: 4px; }
+    .batch-input { padding: 4px; gap: 4px; }
+    .batch-input input { width: 50px; font-size: 16px; padding: 4px; }
+    .batch-input .btn-warning { font-size: 14px; }
+    .stats-grid { gap: 4px; }
+    .stat-box { padding: 6px 2px; }
+    #auth-screen h1 { font-size: 22px; }
+    #admin-stats { font-size: 10px; padding: 4px 6px; max-width: 200px; }
+    .stats-table { font-size: 12px; }
+    .stats-table th { font-size: 10px; }
+    .stats-summary { grid-template-columns: 1fr; }
+    .sess-ico { font-size: 18px; }
+    .sess-info b { font-size: 14px; }
+    .sess-info span { font-size: 10px; }
+    .esc-hist-card { padding: 6px; }
+    .esc-hist-km { font-size: 14px; }
 }
 @media (min-width: 768px) {
     .stats-grid { grid-template-columns: repeat(4, 1fr); }
@@ -102,6 +260,12 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
 </style>
 </head>
 <body>
+
+<div id="admin-stats">
+    <div>📡 <span id="stat-ping" class="ping">0</span>мс · 📦 <b id="stat-req">0</b> · <span id="stat-err" class="err">0</span>ош</div>
+    <div>⚡ <b id="stat-rpm" class="rpm">0</b>/мин · <b id="stat-rph">0</b>/час</div>
+</div>
+
 <div class="container">
 
 <div id="auth-screen" class="metal-panel">
@@ -118,8 +282,8 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
       <span id="ui-nickname">Загрузка...</span>
       <button class="btn-edit" onclick="changeNickname()">✏️</button>
     </div>
-    <div class="stats-grid" style="margin-bottom:10px;">
-      <div class="stat-box"><div class="stat-label">Мой Рекорд (КМ)</div><div class="stat-val" id="ui-best-km">0</div></div>
+    <div class="stats-grid" style="margin-bottom:8px;">
+      <div class="stat-box"><div class="stat-label">Мой Рекорд</div><div class="stat-val" id="ui-best-km">0</div></div>
       <div class="stat-box"><div class="stat-label">Моя Уважуха</div><div class="stat-val" id="ui-uvazh">0</div></div>
     </div>
   </div>
@@ -127,10 +291,10 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
   <div class="metal-panel">
     <div class="panel-title"><span>ОПЕРАТИВНАЯ СВОДКА</span><span id="ui-status" class="status-badge status-stop">ОСТАНОВЛЕН</span></div>
     <div class="stats-grid">
-      <div class="stat-box"><div class="stat-label">Забеги (день)</div><div class="stat-val" id="ui-runs">0/50</div></div>
+      <div class="stat-box"><div class="stat-label">КМ за сегодня</div><div class="stat-val" id="ui-day-km" style="color:var(--accent-yellow)">0</div></div>
       <div class="stat-box run"><div class="stat-label">Текущий км</div><div class="stat-val" id="ui-cur-km">0</div></div>
       <div class="stat-box boss"><div class="stat-label">Урон Боссу</div><div class="stat-val" id="ui-boss-dmg">0</div></div>
-      <div class="stat-box"><div class="stat-label">Всего забегов</div><div class="stat-val" id="ui-total-runs">0</div></div>
+      <div class="stat-box"><div class="stat-label">Забеги (всего)</div><div class="stat-val" id="ui-runs">0</div></div>
     </div>
   </div>
 
@@ -146,6 +310,12 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
       <div class="loot-item"><span style="color:#88ccff">Тайники</span><b id="res-tainiki">0</b></div>
       <div class="loot-item"><span style="color:#cc88ff">Блат</span><b id="res-blat">0</b></div>
       <div class="loot-item"><span style="color:#88ff88">Червонцы</span><b id="res-chervontsy">0</b></div>
+      <div class="loot-item"><span style="color:#b87333">Монтировка</span><b id="res-crowbar">0</b></div>
+      <div class="loot-item"><span style="color:#c0c0c0">Дубинка</span><b id="res-dubinka">0</b></div>
+      <div class="loot-item"><span style="color:#a9a9a9">Кувалда</span><b id="res-lom_bar">0</b></div>
+      <div class="loot-item"><span style="color:#ffa07a">Билет</span><b id="res-limit_ticket">0</b></div>
+      <div class="loot-item"><span style="color:#98fb98">Талон пом.</span><b id="res-talon_help">0</b></div>
+      <div class="loot-item"><span style="color:#add8e6">Талон гол.</span><b id="res-talon_vote">0</b></div>
     </div>
   </div>
 
@@ -159,9 +329,15 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
       <button id="btn-goal-km_safe" class="btn btn-info sm" onclick="setGoal('km_safe')">Экономный</button>
       <button id="btn-goal-loot" class="btn btn-info sm" onclick="setGoal('loot')">Схроны (лут)</button>
     </div>
-    <div style="font-size:14px;color:var(--text-muted);text-align:center;margin-top:10px; border-top:1px dashed #333; padding-top:8px;">
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <button id="btn-goal-nospend" class="btn btn-info sm" onclick="setGoal('nospend')">Без трат</button>
+      <button id="btn-goal-krest" class="btn btn-info sm" onclick="setGoal('krest')">Могильщик</button>
+      <button id="btn-goal-alive" class="btn btn-info sm" onclick="setGoal('alive')">Живыми</button>
+    </div>
+    <div style="font-size:13px;color:var(--text-muted);text-align:center;margin-top:8px; border-top:1px dashed #2a303d; padding-top:8px;">
       Текущая тактика: <span id="ui-goal" style="color:var(--accent-yellow);font-weight:bold;text-transform:uppercase;">—</span>
     </div>
+    <button class="btn btn-info btn-full" onclick="openFineTune()" style="margin-top:8px;">⚙ ТОНКАЯ НАСТРОЙКА</button>
   </div>
 
   <div class="metal-panel">
@@ -170,7 +346,7 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
       <button class="btn btn-primary" onclick="startBatch(0, true)">БЕГ ДО ЛИМИТА</button>
     </div>
     <div class="batch-input">
-      <label style="color:var(--text-muted);font-size:16px;">ЗАБЕГОВ:</label>
+      <label style="color:var(--text-muted);font-size:14px;">ЗАБЕГОВ:</label>
       <input type="number" id="in-batch" value="5" min="1" max="55">
       <button class="btn btn-warning" style="flex:1;" onclick="startBatch(parseInt($('in-batch').value), false)">НАЧАТЬ БЕГ</button>
     </div>
@@ -193,16 +369,21 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
   </div>
 
   <div class="metal-panel">
-    <div class="panel-title">ПОМОЩЬ И КОЛЛЕКЦИИ</div>
+    <div class="panel-title">БАНДА И РЕСУРСЫ</div>
+    <button class="btn btn-warning btn-full" onclick="openGangMenu()">👥 УПРАВЛЕНИЕ БАНДОЙ</button>
+    <button class="btn btn-info btn-full" onclick="openCollections()">🎒 СДАТЬ КОЛЛЕКЦИИ</button>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title">ПОМОЩЬ</div>
     <button id="btn-autohold" class="btn btn-info btn-full" onclick="toggleAutoHelp()">🤝 ВКЛЮЧИТЬ АВТО-ПОМОЩЬ</button>
-    <div id="help-info" style="font-size:14px;color:var(--text-muted);text-align:center;margin-bottom:10px;">Выключено</div>
-    
-    <button class="btn btn-warning btn-full" onclick="openCollections()">🎒 СДАТЬ КОЛЛЕКЦИИ (ЛУТ)</button>
+    <div id="help-info" style="font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:8px;">Выключено</div>
+    <div id="help-stats" style="font-size:12px; color:#888; line-height:1.4; font-family: 'Share Tech Mono', monospace;"></div>
   </div>
 
   <div class="metal-panel">
     <div class="panel-title">СМОТРИТЕЛЬ</div>
-    <div id="boss-info" style="font-size:15px;margin-bottom:12px;color:var(--text-muted);text-align:center;background:#0a0a0a;padding:8px;border-radius:4px;border:1px solid #222;">— Ожидание данных —</div>
+    <div id="boss-info" style="font-size:13px;margin-bottom:10px;color:var(--text-muted);text-align:center;background:#0a0b0e;padding:8px;border-radius:6px;border:1px solid #252c38;">— Ожидание данных —</div>
     <div class="btn-row">
       <button id="btn-boss-hit" class="btn btn-danger" onclick="startBoss()">ТЫКАТЬ БОССА</button>
       <button id="btn-boss-stop" class="btn btn-warning" style="display:none;" onclick="stopBoss()">СТОП</button>
@@ -215,20 +396,37 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
       <button class="btn btn-info" onclick="collectAll()">СОБРАТЬ ДОРОГУ</button>
       <button class="btn btn-info" onclick="showRating()">🏆 ТОП СЕРВЕРА</button>
     </div>
-    <button class="btn btn-danger btn-full" onclick="logout()" style="margin-top:5px;">🚪 ВЫЙТИ ИЗ АККАУНТА</button>
+    <button class="btn btn-info btn-full" onclick="showHistory()" style="margin-top:4px;">📜 ИСТОРИЯ ЗАБЕГОВ</button>
+    <button class="btn btn-warning btn-full" onclick="showStats()" style="margin-top:4px;">📊 СТАТИСТИКА (АДМИН)</button>
+    <button class="btn btn-danger btn-full" onclick="logout()" style="margin-top:4px;">🚪 ВЫЙТИ ИЗ АККАУНТА</button>
   </div>
 
   <div class="metal-panel">
     <div class="panel-title">СТАТИСТИКА СЕССИИ (БОТА)</div>
     <div class="session-stats">
-      <div class="sess-item">🏃 Пробежал: <b id="sess-runs">0</b> забегов</div>
-      <div class="sess-item">📏 Всего км: <b id="sess-km">0</b> км</div>
-      <div class="sess-item">🤝 Помощь: <b id="sess-help">0</b> раз</div>
-      <div class="sess-item">👊 Боссу: <b id="sess-boss">0</b> урона</div>
+      <div class="sess-card">
+        <div class="sess-ico">🏃</div>
+        <div class="sess-info"><span>Забегов</span><b id="sess-runs" class="hl">0</b></div>
+      </div>
+      <div class="sess-card">
+        <div class="sess-ico">📏</div>
+        <div class="sess-info"><span>КМ всего</span><b id="sess-km" class="hl">0</b></div>
+      </div>
+      <div class="sess-card">
+        <div class="sess-ico">🤝</div>
+        <div class="sess-info"><span>Помощи</span><b id="sess-help" class="hl">0</b></div>
+      </div>
+      <div class="sess-card">
+        <div class="sess-ico">👊</div>
+        <div class="sess-info"><span>Урона боссу</span><b id="sess-boss" class="hl">0</b></div>
+      </div>
+    </div>
+    <div class="day-summary" id="day-summary-box">
+      <!-- Сюда рендерится итог ресурсов за сегодня -->
     </div>
   </div>
 
-  <div class="metal-panel" style="padding:5px;">
+  <div class="metal-panel" style="padding:4px;">
     <div id="log-box">&gt; Терминал инициализирован...<br></div>
   </div>
 </div>
@@ -242,6 +440,7 @@ let token = "", device = "";
 let isRunning = false, isPaused = false;
 let isBossHitting = false, isCollecting = false, isResetting = false;
 let cooldownUntil = 0, backoffMs = 0;
+let consecutive429 = 0, consecutive400 = 0;
 let batchTarget = 0, batchDone = 0;
 let runToLimit = false;
 let lastKmInRun = 0;
@@ -249,758 +448,1131 @@ let lastState = null, lastStateTime = 0;
 let autoHelpEnabled = false;
 let pendingGoal = null;
 let isLoggingIn = false;
+let myLogin = null, myDisplayName = null, mySeasonUvazh = null, lastUvazhFetch = 0;
+let bossDeadToday = false;
+let currentMskDay = new Date().toLocaleDateString('ru-RU', {timeZone: 'Europe/Moscow'});
+let session = { runs: 0, km: 0, help: 0, bossDmg: 0, startTime: 0, helpStats: {} };
 
-let session = { runs: 0, km: 0, help: 0, bossDmg: 0 };
+let failedHelps = {}; 
+let currentHistDay = null;
 
-const SETS_INFO = {
-    hishnik: { name: "Хищник", pieces: 5 },
-    trotil: { name: "Детонатор", pieces: 5 },
-    lom: { name: "Кувалда", pieces: 5 },
-    grom: { name: "Грянул гром", pieces: 5 },
-    dolgiy: { name: "Долгий день", pieces: 5 },
-    nibelungi: { name: "Нибелунги", pieces: 5 },
-    koresha: { name: "Кореша", pieces: 5 },
-    podelniki: { name: "Подельники", pieces: 5 }
+// Функция для сокращения больших чисел (454K, 8.6B)
+function fmtNum(num) {
+    if (!num || num === 0) return "0";
+    const abs = Math.abs(num);
+    if (abs < 1000) return num.toString();
+    if (abs < 1000000) return (num / 1000).toFixed(abs >= 100000 ? 0 : 1).replace(/\.0$/, '') + "K";
+    if (abs < 1000000000) return (num / 1000000).toFixed(abs >= 100000000 ? 0 : 1).replace(/\.0$/, '') + "M";
+    if (abs < 1000000000000) return (num / 1000000000).toFixed(abs >= 100000000000 ? 0 : 1).replace(/\.0$/, '') + "B";
+    return (num / 1000000000000).toFixed(1).replace(/\.0$/, '') + "T";
+}
+
+function getLocalDayStr(ts) {
+    const d = new Date(ts || Date.now());
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function getTodayLocalDay() { return getLocalDayStr(); }
+function getYesterdayLocalDay() { return getLocalDayStr(Date.now() - 86400000); }
+function getBeforeYesterdayLocalDay() { return getLocalDayStr(Date.now() - 2*86400000); }
+
+function loadSession() {
+    const saved = localStorage.getItem('bot_session');
+    const savedDay = localStorage.getItem('bot_session_day');
+    const today = getTodayLocalDay();
+    if (saved && savedDay === today) {
+        try { session = JSON.parse(saved); } catch(e) { session = { runs: 0, km: 0, help: 0, bossDmg: 0, startTime: 0, helpStats: {} }; }
+    } else {
+        session = { runs: 0, km: 0, help: 0, bossDmg: 0, startTime: Date.now(), helpStats: {} };
+        localStorage.setItem('bot_session_day', today);
+    }
+    if (!session.startTime) session.startTime = Date.now();
+    if (!session.helpStats) session.helpStats = {};
+    saveSession();
+}
+
+function saveSession() {
+    localStorage.setItem('bot_session', JSON.stringify(session));
+}
+
+// ========== СТАТИСТИКА ==========
+let statsData = {
+    total: 0, errors: 0, expectedErrors: 0, pings: [], sessionStart: Date.now(),
+    endpoints: {}, perMinute: {}, perHour: {}, recentErrors: [],
 };
 
-function plural(n, titles) {
-  const cases = [2, 0, 1, 1, 1, 2];
-  return titles[(n % 100 > 4 && n % 100 < 20) ? 2 : cases[(n % 10 < 5) ? n % 10 : 5]];
+function nowMinKey() { return new Date().toISOString().slice(0,16); }
+function nowHourKey() { return new Date().toISOString().slice(0,13); }
+
+function statsCleanup() {
+    const now = Date.now();
+    for (const k of Object.keys(statsData.perMinute)) {
+        const [d,t] = k.split('T'); const [Y,M,D] = d.split('-').map(Number); const [h,m] = t.split(':').map(Number);
+        if (new Date(Y,M-1,D,h,m).getTime() < now - 2*3600*1000) delete statsData.perMinute[k];
+    }
+    for (const k of Object.keys(statsData.perHour)) {
+        const [d,t] = k.split('T'); const [Y,M,D] = d.split('-').map(Number);
+        if (new Date(Y,M-1,D,+t).getTime() < now - 48*3600*1000) delete statsData.perHour[k];
+    }
+    if (statsData.recentErrors.length > 20) statsData.recentErrors.length = 20;
+}
+
+function statsRecord(endpoint, op, ms, ok, status, msg, expected = false) {
+    statsData.total++;
+    const ep = statsData.endpoints[endpoint] || (statsData.endpoints[endpoint] = { count: 0, err: 0, expectedErr: 0, sumMs: 0, ops: {} });
+    ep.count++; ep.sumMs += ms;
+    if (!ok) {
+        if (expected) { statsData.expectedErrors++; ep.expectedErr++; }
+        else { statsData.errors++; ep.err++; }
+    }
+    if (op) {
+        const o = ep.ops[op] || (ep.ops[op] = { count: 0, err: 0, expectedErr: 0 });
+        o.count++;
+        if (!ok) { if (expected) o.expectedErr++; else o.err++; }
+    }
+    const mk = nowMinKey();
+    const mrec = statsData.perMinute[mk] || (statsData.perMinute[mk] = { count: 0, err: 0 });
+    mrec.count++; if (!ok) mrec.err++;
+    const hk = nowHourKey();
+    const hrec = statsData.perHour[hk] || (statsData.perHour[hk] = { count: 0, err: 0 });
+    hrec.count++; if (!ok) hrec.err++;
+    if (!ok && statsData.recentErrors.length < 20) {
+        statsData.recentErrors.unshift({ t: Date.now(), endpoint, op, status, msg, expected });
+        if (statsData.recentErrors.length > 20) statsData.recentErrors.length = 20;
+    }
+    statsCleanup(); updateAdminStats();
+}
+
+function statsRpm() { const k = nowMinKey(); return statsData.perMinute[k] ? statsData.perMinute[k].count : 0; }
+function statsRph() { const k = nowHourKey(); return statsData.perHour[k] ? statsData.perHour[k].count : 0; }
+function statsAvgRpm() { const min = Math.max(1, (Date.now() - statsData.sessionStart) / 60000); return Math.round((statsData.total / min) * 10) / 10; }
+function statsAvgPing() { if (!statsData.pings.length) return 0; return Math.round(statsData.pings.reduce((a,b)=>a+b,0) / statsData.pings.length); }
+
+function updateAdminStats() {
+    const el = $("admin-stats"); if (!el) return;
+    $("stat-ping").innerText = statsAvgPing(); $("stat-req").innerText = statsData.total;
+    $("stat-err").innerText = statsData.errors; $("stat-rpm").innerText = statsRpm();
+    $("stat-rph").innerText = statsRph();
+}
+
+// ========== НАСТРОЙКИ ==========
+const FINE_TUNE_CFG = {
+  camp: { title: "Лагерь", options: [
+      {v:"smart",l:"По цели", d:"Авто-лечение и кормёжка по выбранной стратегии."},
+      {v:"rest",l:"Лечить в полный", d:"Всегда лечит HP и выносливость до максимума, пока есть колёса."},
+      {v:"pass",l:"Не тратить", d:"Ничего не делает в лагере, бежит дальше."}]},
+  food: { title: "Бутеры в бафф", options: [
+      {v:"smart",l:"По цели", d:"Кормит отряд до 5 раз, сохраняя запас на схроны."},
+      {v:"max",l:"По максимуму", d:"Кормит до 5 раз на всех, не оставляя запас."},
+      {v:"off",l:"Не тратить", d:"Не тратит бутеры на бафф."}]},
+  village: { title: "Деревня", options: [
+      {v:"smart",l:"По цели", d:"Заходит, если банда здорова или нужна еда."},
+      {v:"enter",l:"Заходить", d:"Всегда обносит хаты за заначки и еду."},
+      {v:"pass",l:"Обходить", d:"Всегда обходит стороной."}]},
+  stash: { title: "Схрон", options: [
+      {v:"smart",l:"По цели", d:"Ищет ништяки, если хватает бутеров."},
+      {v:"1",l:"1", d:"Только 1 обыск (первый бесплатный)."},
+      {v:"2",l:"2", d:"До 2 обысков."},
+      {v:"3",l:"3", d:"До 3 обысков."},
+      {v:"5",l:"5", d:"До 5 обысков (максимум)."},
+      {v:"skip",l:"Мимо", d:"Проходит мимо схрона."}]},
+  krest: { title: "Могильщик", options: [
+      {v:"smart",l:"По цели", d:"Решает драться или отступить."},
+      {v:"fight",l:"Биться", d:"Всегда вступает в бой."},
+      {v:"sacrifice",l:"Жертвовать", d:"Всегда отдаёт одного кореша."}]},
+  trotil: { title: "Детонатор (100+ км)", options: [
+      {v:"ask",l:"Спросить", d:"Бот остановится и будет ждать кнопки."},
+      {v:"fight",l:"Биться", d:"Всегда атакует."},
+      {v:"pass",l:"Пропустить", d:"Всегда откупается корешем."}]},
+  lom: { title: "Кувалда (300+ км)", options: [
+      {v:"ask",l:"Спросить", d:"Бот остановится и будет ждать кнопки."},
+      {v:"fight",l:"Биться", d:"Всегда атакует."},
+      {v:"pass",l:"Пропустить", d:"Всегда откупается корешем."}]},
+  campDead: { title: "Если кореш мёртв", options: [
+      {v:"ask",l:"Спросить", d:"Остановится и будет ждать кнопки."},
+      {v:"skip",l:"Не стопать", d:"Бежит дальше без замены."},
+      {v:"best1",l:"Сильн. ×1", d:"Заменяет 1 раза за забег."},
+      {v:"best2",l:"Сильн. ×2", d:"Заменяет 2 раза за забег."},
+      {v:"best3",l:"Сильн. ×3", d:"Заменяет 3 раза за забег."},
+      {v:"best",l:"Макс", d:"Заменяет без ограничений."}]},
+  campStop: { title: "Стоп в лагере", options: [
+      {v:"off",l:"Не стопать", d:"Не останавливается."},
+      {v:"all",l:"Каждый", d:"Останавливается в каждом лагере."},
+      {v:"50",l:"Каждые 50", d:"Останавливается на каждом 50-м км."},
+      {v:"100",l:"Каждые 100", d:"Останавливается на каждом 100-м км."}]},
+};
+
+const GOAL_NAMES = { 'km_all':'Агрессивный','km_mid':'Умный','km_safe':'Экономный','nospend':'Без трат','loot':'Схроны','krest':'Могильщик','alive':'Живыми' };
+const FIGHTER_NAMES = { mihalych:"Седой", suhoy:"Жила", mamont:"Бивень", alegrych:"Дядя Фёдор", golova:"Шрам", argun:"Башка", semenyich:"Бродяга", baton:"Каравайчик", voron:"Ворон", klyk:"Клык", boyara:"Валун", traktorist:"Бульник", lenya:"Ломоть", kaban:"Кабан", beton:"Бетон", karavay:"Фельдшер", kirovskiy:"Склифос", skalpel:"Пинцет", medved:"Хозяин", pushkin:"Гоголь", zhostkiy:"Хмырь", kostoprav:"Костоправ", pila:"Пила" };
+const GIFT_NAMES = { 'trail':'сбить хвост','buter':'костёр','pills':'лечение','cover':'прикрыть' };
+const SETS_INFO = { hishnik:{name:"Хищник",pieces:5}, trotil:{name:"Детонатор",pieces:5}, lom:{name:"Кувалда",pieces:5}, grom:{name:"Грянул гром",pieces:5}, dolgiy:{name:"Долгий день",pieces:5}, nibelungi:{name:"Нибелунги",pieces:5}, koresha:{name:"Кореша",pieces:5}, podelniki:{name:"Подельники",pieces:5} };
+
+const RES_ICONS = {
+  zanachki:'💰', buter:'🍞', pills:'💊', soap:'🧼', papirosy:'🚬', sugar:'🍬', tainiki:'📦', blat:'📜', chervontsy:'💎',
+  crowbar:'🔧', dubinka:'🏏', lom_bar:'🪓', limit_ticket:'🎫', talon_help:'🤝', talon_vote:'🗳️'
+};
+
+const KNOWN_RES_LABELS = {
+  zanachki:'Заначки', buter:'Бутеры', pills:'Колёса', soap:'Масло', papirosy:'Сигареты', sugar:'Песок', 
+  tainiki:'Тайники', blat:'Блат', chervontsy:'Червонцы',
+  crowbar:'Монтировка', dubinka:'Дубинка', lom_bar:'Кувалда', limit_ticket:'Билет', talon_help:'Талон пом.', talon_vote:'Талон гол.'
+};
+
+const ENEMY_NAMES = {
+  konvoy:"Караул", tihon:"Фонарь", kinolog:"Псарь", spetsnaz:"Штурмовики", omon:"Щитовики",
+  palych:"Капитан", bes:"Шатун", fin:"Бритва", fsin:"Каратели", krest:"Могильщик",
+  trotil:"Детонатор", lom:"Кувалда", cyclop:"Прожектор", buldozer:"Танк"
+};
+
+const ENEMY_EMOJIS = {
+  konvoy:"💂", tihon:"👮", kinolog:"🐕‍🦺", spetsnaz:"🥷", omon:"🪖",
+  palych:"👨‍✈️", bes:"🥊", fin:"🔪", fsin:"🦹", krest:"🧟‍♂️",
+  trotil:"💀", lom:"🪓", cyclop:"👁️", buldozer:"🚜"
+};
+
+function trackHelp(name, kind) {
+    if (!session.helpStats) session.helpStats = {};
+    if (!session.helpStats[name]) session.helpStats[name] = { count: 0, trail: 0, pills: 0, buter: 0, cover: 0 };
+    session.helpStats[name].count++;
+    if (session.helpStats[name][kind] !== undefined) session.helpStats[name][kind]++;
+    saveSession();
+    updateHelpStatsUI();
+}
+
+function updateHelpStatsUI() {
+    const box = $("help-stats"); if (!box) return;
+    if (!session.helpStats || !Object.keys(session.helpStats).length) {
+        box.innerHTML = "Пока никого не выручал.";
+        return;
+    }
+    let html = "";
+    for (const [name, s] of Object.entries(session.helpStats)) {
+        const parts = [];
+        if (s.trail) parts.push(`хвост: ${s.trail}`);
+        if (s.cover) parts.push(`прикрыл: ${s.cover}`);
+        if (s.pills) parts.push(`таблы: ${s.pills}`);
+        if (s.buter) parts.push(`хавка: ${s.buter}`);
+        html += `<div style="display:flex; justify-content:space-between; margin-top:2px;"><span>🤝 ${name}:</span> <span style="color:#fff">${s.count} раз</span></div>`;
+        html += `<div style="font-size:11px; color:#627080; margin-bottom:2px; margin-left:20px;">${parts.join(", ")}</div>`;
+    }
+    box.innerHTML = html;
 }
 
 function updateSessionUI() {
-  $("sess-runs").innerText = session.runs;
-  $("sess-km").innerText = session.km.toLocaleString();
-  $("sess-help").innerText = session.help;
-  $("sess-boss").innerText = session.bossDmg.toLocaleString();
+    $("sess-runs").innerText = session.runs;
+    $("sess-km").innerText = fmtNum(session.km);
+    $("sess-help").innerText = session.help;
+    $("sess-boss").innerText = fmtNum(session.bossDmg);
+    saveSession();
+}
+function plural(n, titles) { const cases = [2,0,1,1,1,2]; return titles[(n%100>4 && n%100<20) ? 2 : cases[(n%10<5) ? n%10 : 5]]; }
+
+function log(msg, type="info") {
+    const box = $("log-box"); if (!box) return;
+    const el = document.createElement("div");
+    const cls = type==="error"?"log-error":type==="warn"?"log-warn":type==="success"?"log-success":"";
+    const t = new Date().toLocaleTimeString('ru-RU',{hour12:false});
+    el.innerHTML = `<span class="log-time">[${t}]</span> <span class="${cls}">${msg}</span>`;
+    box.appendChild(el); box.scrollTop = box.scrollHeight;
+    if (box.children.length > 100) box.firstChild.remove();
 }
 
-function log(msg, type = "info") {
-  const box = $("log-box"); if (!box) return;
-  const el = document.createElement("div");
-  const cls = type === "error" ? "log-error" : type === "warn" ? "log-warn" : type === "success" ? "log-success" : "";
-  const t = new Date().toLocaleTimeString('ru-RU', { hour12: false });
-  el.innerHTML = `<span class="log-time">[${t}]</span> <span class="${cls}">${msg}</span>`;
-  box.appendChild(el); box.scrollTop = box.scrollHeight;
-  if (box.children.length > 80) box.firstChild.remove();
+// ========== ОПЕРАЦИИ И СЕТЬ ==========
+async function getAuthHeaders() { return { "Content-Type":"application/json", "X-Esc-Device":device, "Authorization":"Bearer "+token }; }
+
+function triggerBackoff(reason) {
+    consecutive429++; const baseDelay = Math.min(1000*Math.pow(1.5, consecutive429-1), 30000);
+    backoffMs = baseDelay + Math.random()*500; cooldownUntil = Date.now() + backoffMs;
+    log(`⚠ ${reason}: пауза ${(backoffMs/1000).toFixed(1)}с`, "warn");
+}
+function resetBackoff() {
+    if (consecutive429 > 0) log(`✓ Соединение восстановлено`, "success");
+    consecutive429 = 0; consecutive400 = 0; backoffMs = 0; cooldownUntil = 0;
 }
 
-async function getAuthHeaders() {
-  return { "Content-Type": "application/json", "X-Esc-Device": device, "Authorization": "Bearer " + token };
-}
-
-async function fetchWithTimeout(url, options, timeout = 4000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
-    clearTimeout(id);
-    return res;
-  } catch (e) {
-    clearTimeout(id);
-    return null;
-  }
+async function fetchWithTimeout(url, options, timeout = 4000, meta = {}) {
+    const start = performance.now(); const controller = new AbortController(); const id = setTimeout(()=>controller.abort(), timeout);
+    const shortUrl = url.replace(BASE_URL, "").split('?')[0];
+    try {
+        const res = await fetch(url, { ...options, signal: controller.signal }); clearTimeout(id);
+        const ms = Math.round(performance.now() - start);
+        statsData.pings.push(ms); if (statsData.pings.length > 20) statsData.pings.shift();
+        let ok = res.ok; let errMsg = ""; let expected = false;
+        if (!ok) {
+            errMsg = "HTTP " + res.status;
+            if (res.status === 429) triggerBackoff("429");
+            else if (res.status === 401) log("Ошибка 401: токен неверный", "error");
+            else if (res.status === 400) {
+                errMsg += " (рассинхрон)";
+                if (shortUrl === "/escape/convoy/give") expected = true;
+            }
+        } else resetBackoff();
+        statsRecord(shortUrl, meta.op || null, ms, ok, res.status, errMsg, expected);
+        return res;
+    } catch (e) {
+        clearTimeout(id); const ms = Math.round(performance.now() - start);
+        const msg = e.name === "AbortError" ? "таймаут" : "сетевая ошибка";
+        statsRecord(shortUrl, meta.op || null, ms, false, 0, msg, false);
+        return null;
+    }
 }
 
 async function act(op, params = {}) {
-  try {
-    const res = await fetchWithTimeout(`${BASE_URL}/escape/act`, {
-      method: "POST", headers: await getAuthHeaders(), body: JSON.stringify({ action: { op, ...params } })
-    });
-    if (!res) { log("Таймаут запроса (сервер не отвечает)", "error"); return { ok: false, error: "Timeout" }; }
-    if (res.status === 401) { log("Ошибка 401: Токен неверный!", "error"); return { ok: false, error: "401" }; }
-    if (res.status === 429) {
-      backoffMs = Math.min(backoffMs + 300, 4000);
-      cooldownUntil = Date.now() + backoffMs;
-      return { ok: false, error: "429" };
-    }
-    if (res.ok) backoffMs = 0;
-    const data = await res.json();
-    if (data && data.state) { 
-      lastState = data.state; 
-      lastStateTime = Date.now();
-      if (data.state.dayDmg > 0) session.bossDmg = data.state.dayDmg;
-    }
-    return data;
-  } catch (e) { return { ok: false, error: "Net" }; }
+    try {
+        const res = await fetchWithTimeout(`${BASE_URL}/escape/act`, {
+            method:"POST", headers: await getAuthHeaders(), body: JSON.stringify({ action:{ op, ...params } })
+        }, 6000, { op });
+        if (!res) return { ok:false, error:"Timeout" };
+        if (res.status === 401) return { ok:false, error:"401" };
+        if (res.status === 400) {
+            consecutive400++;
+            if (consecutive400 >= 5) { cooldownUntil = Date.now() + 10000; consecutive400 = 0; return { ok:false, error:"400" }; }
+            const fresh = await getState(); if (fresh) { lastState = fresh; lastStateTime = Date.now(); }
+            return { ok:false, error:"400" };
+        }
+        if (res.status === 429) return { ok:false, error:"429" };
+        const data = await res.json();
+        if (data && (data.success === true || data.error === null)) data.ok = true;
+        else if (data && data.error) data.ok = false;
+        else if (res.ok && !data.error) data.ok = true;
+        if (data && data.state) { lastState = data.state; lastStateTime = Date.now(); }
+        return data;
+    } catch (e) { return { ok:false, error:"Net" }; }
 }
 
 async function getState() {
-  try {
-    const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() });
-    if (!res) return null;
-    if (res.status === 401) return null;
-    if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
-    const j = await res.json();
-    if (j.state && j.state.dayDmg > 0) session.bossDmg = j.state.dayDmg;
-    return j.state;
-  } catch (e) { return null; }
+    try {
+        const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() }, 6000, { op:"getState" });
+        if (!res || res.status === 401 || res.status === 429) return null;
+        const j = await res.json(); return j.state;
+    } catch (e) { return null; }
 }
-
 async function apiGet(path) {
-  try {
-    const res = await fetchWithTimeout(`${BASE_URL}${path}`, { headers: await getAuthHeaders() });
-    if (!res) return null;
-    if (res.status === 401) return null;
-    if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
-    return await res.json();
-  } catch (e) { return null; }
+    try {
+        const res = await fetchWithTimeout(`${BASE_URL}${path}`, { headers: await getAuthHeaders() }, 6000, { op:"apiGet "+path });
+        if (!res || res.status === 401 || res.status === 429) return null;
+        return await res.json();
+    } catch (e) { return null; }
 }
-
 async function apiPost(path, body = {}) {
-  try {
-    const res = await fetchWithTimeout(`${BASE_URL}${path}`, {
-      method: "POST", headers: await getAuthHeaders(), body: JSON.stringify(body)
-    });
-    if (!res) return null;
-    if (res.status === 401) return null;
-    if (res.status === 429) { cooldownUntil = Date.now() + 2000; return null; }
-    return await res.json();
-  } catch (e) { return null; }
+    try {
+        const res = await fetchWithTimeout(`${BASE_URL}${path}`, {
+            method:"POST", headers: await getAuthHeaders(), body: JSON.stringify(body)
+        }, 6000, { op:"apiPost "+path });
+        if (!res || res.status === 401 || res.status === 429) return null;
+        return await res.json();
+    } catch (e) { return null; }
 }
 
-function getNicknameFromToken(jwt) {
-  try {
-    const payload = JSON.parse(atob(jwt.split('.')[1]));
-    return payload.login || payload.username || payload.name || payload.sub || "Безымянный";
-  } catch (e) { return "Безымянный"; }
-}
+function getLoginFromToken(jwt) { try { const p = JSON.parse(atob(jwt.split('.')[1])); return p.login || p.username || p.sub; } catch { return null; } }
 
-// ЖЕСТКАЯ ПРОВЕРКА ДАННЫХ ПРИ ВХОДЕ
 async function login() {
-  if (isLoggingIn) return;
-  token = $("in-token").value.trim();
-  device = $("in-device").value.trim();
-  if (!token || !device) return alert("Введи токен и ID устройства!");
-  
-  isLoggingIn = true;
-  const btn = document.querySelector('#auth-screen .btn-primary');
-  const oldText = btn.innerText;
-  btn.innerText = "ПРОВЕРКА...";
-  btn.disabled = true;
-
-  try {
-    // Пробуем получить стейт
-    const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { 
-      headers: { "Authorization": "Bearer " + token, "X-Esc-Device": device } 
-    }, 5000);
-
-    if (!res) throw new Error("Сервер игры не отвечает (таймаут).");
-    if (res.status === 401) throw new Error("Неверный токен или ID устройства.");
-    if (res.status === 403) throw new Error("Сервер заблокировал запрос (кулдаун).");
-    if (!res.ok) throw new Error("Ошибка сервера: " + res.status);
-
-    const j = await res.json();
-    if (!j.state) throw new Error("Сервер вернул пустой ответ.");
-
-    // Если дошли сюда — данные верные
-    localStorage.setItem("bot_token", token);
-    localStorage.setItem("bot_device", device);
-    localStorage.removeItem("force_logout");
-    
-    $("ui-nickname").innerText = getNicknameFromToken(token);
-    $("auth-screen").style.display = "none";
-    $("main-screen").style.display = "block";
-    log("УСПЕШНЫЙ ВХОД", "success");
-    
-    // Сразу применяем стейт, чтобы не ждать
-    lastState = j.state;
-    lastStateTime = Date.now();
-    updateUI();
-    
-    startStateLoop();
-  } catch (err) {
-    alert("ОШИБКА ВХОДА: " + err.message + "\n\nПроверь токен и ID.");
-    localStorage.removeItem("bot_token");
-    localStorage.removeItem("bot_device");
-  } finally {
-    isLoggingIn = false;
-    btn.innerText = oldText;
-    btn.disabled = false;
-  }
+    if (isLoggingIn) return;
+    token = $("in-token").value.trim(); device = $("in-device").value.trim();
+    if (!token || !device) return alert("Введи токен и ID устройства!");
+    isLoggingIn = true; const btn = document.querySelector('#auth-screen .btn-primary'); const oldText = btn.innerText; btn.innerText = "ПРОВЕРКА..."; btn.disabled = true;
+    try {
+        const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { headers: { "Authorization":"Bearer "+token, "X-Esc-Device":device } }, 5000, { op:"login" });
+        if (!res) throw new Error("Сервер не отвечает.");
+        if (res.status === 401) throw new Error("Неверный токен или ID.");
+        if (!res.ok) throw new Error("Ошибка сервера: " + res.status);
+        const j = await res.json(); if (!j.state) throw new Error("Пустой ответ.");
+        localStorage.setItem("bot_token", token); localStorage.setItem("bot_device", device); localStorage.removeItem("force_logout");
+        myLogin = getLoginFromToken(token); $("ui-nickname").innerText = myLogin || "Загрузка...";
+        $("auth-screen").style.display = "none"; $("main-screen").style.display = "block";
+        log("УСПЕШНЫЙ ВХОД", "success");
+        lastState = j.state; lastStateTime = Date.now(); updateUI(); applyAutoHelpUI(); updateHelpStatsUI();
+        if (pendingGoal && lastState && !lastState.run) setTimeout(()=>setGoal(pendingGoal), 400);
+        startStateLoop();
+    } catch (err) {
+        alert("ОШИБКА: " + err.message); localStorage.removeItem("bot_token"); localStorage.removeItem("bot_device");
+    } finally { isLoggingIn = false; btn.innerText = oldText; btn.disabled = false; }
 }
 
-function logout() { 
-  if (!confirm("Выйти из аккаунта?")) return;
-  localStorage.clear(); 
-  localStorage.setItem("force_logout", "true"); 
-  location.reload(); 
-}
+function logout() { if (!confirm("Выйти из аккаунта?")) return; localStorage.removeItem("bot_token"); localStorage.removeItem("bot_device"); localStorage.setItem("force_logout", "true"); location.reload(); }
 
 window.onload = () => {
-  const forceLogout = localStorage.getItem("force_logout") === "true";
-  const st = localStorage.getItem("bot_token");
-  const sd = localStorage.getItem("bot_device");
-  
-  if (st && sd && !forceLogout) {
-    $("in-token").value = st;
-    $("in-device").value = sd;
-    login();
-  }
-  updateSessionUI();
+    loadSession();
+    const savedGoal = localStorage.getItem('bot_goal'); if (savedGoal && GOAL_NAMES[savedGoal]) pendingGoal = savedGoal;
+    autoHelpEnabled = localStorage.getItem('bot_autohelp') === 'true';
+    const savedBatch = localStorage.getItem('bot_batch'); if (savedBatch) $("in-batch").value = savedBatch;
+    const forceLogout = localStorage.getItem("force_logout") === "true";
+    const st = localStorage.getItem("bot_token"); const sd = localStorage.getItem("bot_device");
+    if (st && sd && !forceLogout) { $("in-token").value = st; $("in-device").value = sd; login(); }
+    updateSessionUI(); updateAdminStats(); updateHelpStatsUI();
 };
 
 function getRes(key) {
-  const st = lastState;
-  if (!st) return 0;
-  if (key === 'blat') return st.blat || 0;
-  if (st.res && st.res[key] !== undefined) return st.res[key];
-  if (st.wallet && st.wallet[key] !== undefined) return st.wallet[key];
-  return 0;
+    const st = lastState; if (!st) return 0;
+    if (key === 'blat') return st.blat || 0;
+    if (st.res && st.res[key] !== undefined) return st.res[key];
+    if (st.wallet && st.wallet[key] !== undefined) return st.wallet[key];
+    return 0;
+}
+
+function renderResources() {
+    const st = lastState; if (!st) return;
+    for (const k of Object.keys(KNOWN_RES_LABELS)) {
+        const el = $("res-"+k); if (el) el.innerText = fmtNum(getRes(k));
+    }
+}
+
+function calcTodayResources(state) {
+    const today = getTodayLocalDay();
+    const loot = {}, spent = {};
+    for (let h of (state.history || [])) {
+        if (h.day === today) {
+            for (let k in h.loot) loot[k] = (loot[k]||0) + h.loot[k];
+            for (let k in h.spent) spent[k] = (spent[k]||0) + h.spent[k];
+        }
+    }
+    if (state.run) {
+        for (let k in state.run.loot) loot[k] = (loot[k]||0) + state.run.loot[k];
+        for (let k in state.run.spent) spent[k] = (spent[k]||0) + state.run.spent[k];
+    }
+    return { loot, spent };
+}
+
+function renderDaySummary(state) {
+    const box = $("day-summary-box"); if (!box) return;
+    const { loot, spent } = calcTodayResources(state);
+    const allKeys = new Set([...Object.keys(loot), ...Object.keys(spent)]);
+    
+    if (!allKeys.size) { box.innerHTML = '<div style="text-align:center;color:#627080;font-size:13px;">Сегодня ещё не было забегов</div>'; return; }
+    
+    let html = "";
+    for (const k of allKeys) {
+        const plus = loot[k] || 0;
+        const minus = spent[k] || 0;
+        if (plus === 0 && minus === 0) continue;
+        const icon = RES_ICONS[k] || '📦';
+        const name = KNOWN_RES_LABELS[k] || k;
+        
+        let pTxt = plus ? `<b class="plus">+${fmtNum(plus)}</b>` : "";
+        let mTxt = minus ? `<b class="minus">-${fmtNum(minus)}</b>` : "";
+        
+        html += `<div class="day-res-row">
+            <span><span class="res-icon">${icon}</span> ${name}</span>
+            <div style="display:flex; gap:6px;">${pTxt} ${mTxt}</div>
+        </div>`;
+    }
+    box.innerHTML = html;
+}
+
+function getTodayKm(state) {
+    // Берем напрямую из API игры
+    return state.dayKm || 0;
 }
 
 async function setGoal(goal) {
-  if (lastState && lastState.run) {
-    pendingGoal = goal;
-    log("Тактика будет применена при следующем старте.", "warn");
-    updateUI();
-    return;
-  }
-  
-  const res = await act("autocfg", { auto_cfg: goal });
-  if (res && res.ok) {
-    log("Тактика изменена на: " + goal, "success");
-    if(lastState && lastState.autoCfg) lastState.autoCfg.goal = goal;
-    updateUI();
-  } else {
-    log("Ошибка смены тактики: " + (res?.error || "неизвестная"), "error");
-  }
+    if (lastState && lastState.run) { pendingGoal = goal; log("Тактика применится при следующем старте.", "warn"); updateUI(); return; }
+    const res = await act("autocfg", { k:"goal", v:goal });
+    if (res && res.ok) {
+        log("Тактика изменена на: " + GOAL_NAMES[goal], "success");
+        if (lastState && lastState.autoCfg) lastState.autoCfg.goal = goal;
+        pendingGoal = null; localStorage.setItem('bot_goal', goal); updateUI();
+    } else log("Ошибка смены тактики: " + (res?.message || res?.error || "неизвестная"), "error");
 }
 
 async function changeNickname() {
-  const newNick = prompt("Введите новый никнейм (3-15 символов):", $("ui-nickname").innerText);
-  if (!newNick || newNick.length < 3) return;
-  const res = await act("nickname", { name: newNick });
-  if (res && res.ok) {
-    log("Никнейм успешно изменен!", "success");
-    $("ui-nickname").innerText = newNick;
-  } else {
-    log("Ошибка смены ника: " + (res?.error || "занято или нельзя"), "error");
-  }
+    const newNick = prompt("Введите новый никнейм (3-15 символов):", $("ui-nickname").innerText);
+    if (!newNick || newNick.length < 3) return;
+    const res = await act("nickname", { name:newNick });
+    if (res && res.ok) { log("Никнейм успешно изменен!", "success"); $("ui-nickname").innerText = newNick; myDisplayName = newNick; }
+    else log("Ошибка смены ника: " + (res?.message || res?.error || "занято"), "error");
 }
 
 async function showRating() {
-  log("Загрузка рейтинга сервера...", "info");
-  const [topKm, topUvazh] = await Promise.all([
-    apiGet("/escape/rating"),
-    apiGet("/escape/uvazh-rating")
-  ]);
-  
-  if (!topKm || !topUvazh) return log("Не удалось загрузить рейтинг", "error");
+    log("Загрузка рейтинга сервера...", "info");
+    const [topKm, topUvazh] = await Promise.all([ apiGet("/escape/rating"), apiGet("/escape/uvazh-rating") ]);
+    if (!topKm || !topUvazh) return log("Не удалось загрузить рейтинг", "error");
+    let html = '<div class="col-modal-box metal-panel">';
+    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:8px;font-family:\'VT323\',monospace;letter-spacing:2px;font-size:20px;">🏆 ТОП ПО КИЛОМЕТРАМ</h2>';
+    if (topKm.players && topKm.players.length) {
+        topKm.players.slice(0,10).forEach((p,i)=>{
+            const isMe = (p.display_name === myDisplayName) || (p.login === myLogin);
+            const place = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
+            html += `<div class="rating-row ${isMe?'me':''}"><span class="rating-place">${place}</span><span class="rating-name">${p.display_name||p.login}</span><span class="rating-val">${fmtNum(p.record_km||0)}</span></div>`;
+        });
+    } else html += '<div style="text-align:center;padding:10px;color:#777;">Нет данных</div>';
+    html += '<h2 style="color:var(--accent-green);text-align:center;margin:16px 0 8px;font-family:\'VT323\',monospace;letter-spacing:2px;font-size:20px;">💚 ТОП ПО УВАЖУХЕ</h2>';
+    if (topUvazh.rows && topUvazh.rows.length) {
+        topUvazh.rows.slice(0,10).forEach((p,i)=>{
+            const isMe = p.me === true;
+            const place = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
+            html += `<div class="rating-row ${isMe?'me':''}"><span class="rating-place">${place}</span><span class="rating-name">${p.name}</span><span class="rating-val" style="color:var(--accent-green)">${fmtNum(p.uvazh||0)}</span></div>`;
+        });
+    } else html += '<div style="text-align:center;padding:10px;color:#777;">Нет данных</div>';
+    html += '</div>';
+    const modal = document.createElement("div"); modal.className = "col-modal-bg"; modal.innerHTML = html; document.body.appendChild(modal);
+}
 
-  let html = '<div class="col-modal-box metal-panel">';
-  html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
-  
-  html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:10px;">🏆 ТОП ПО КИЛОМЕТРАМ</h2>';
-  if (topKm.players && topKm.players.length) {
-    topKm.players.slice(0, 10).forEach((p, i) => {
-      const isMe = p.login === getNicknameFromToken(token);
-      const place = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.';
-      html += `<div class="rating-row ${isMe?'me':''}">
-        <span class="rating-place">${place}</span>
-        <span class="rating-name">${p.display_name || p.login}</span>
-        <span class="rating-val">${p.record_km || 0} км</span>
-      </div>`;
+// ========== ИСТОРИЯ ЗАБЕГОВ ==========
+function showHistory() {
+    if (!lastState || !lastState.history || !lastState.history.length) return alert("История забегов пуста.");
+    
+    const today = getTodayLocalDay();
+    const yesterday = getYesterdayLocalDay();
+    const beforeYesterday = getBeforeYesterdayLocalDay();
+
+    const byDay = {};
+    for (let h of lastState.history) {
+        if (!byDay[h.day]) byDay[h.day] = [];
+        byDay[h.day].push(h);
+    }
+    
+    if (!currentHistDay || !byDay[currentHistDay]) {
+        if (byDay[today]) currentHistDay = today;
+        else if (byDay[yesterday]) currentHistDay = yesterday;
+        else if (byDay[beforeYesterday]) currentHistDay = beforeYesterday;
+        else currentHistDay = Object.keys(byDay).sort().reverse()[0];
+    }
+
+    let html = '<div class="col-modal-bg" onclick="if(event.target===this) this.remove()"><div class="col-modal-box metal-panel hist" style="max-height: 86vh; width: min(96vw, 460px);">';
+    html += '<div class="panel-title" style="margin:-12px -12px 12px -12px; font-size:18px;">📜 ЖУРНАЛ ЗАБЕГОВ</div>';
+    
+    html += '<div class="esc-hist-tabs">';
+    const tabs = [
+        {d: today, l: "Сегодня"},
+        {d: yesterday, l: "Вчера"},
+        {d: beforeYesterday, l: "Позавчера"}
+    ];
+    for (let t of tabs) {
+        const isOn = t.d === currentHistDay;
+        const dObj = new Date(t.d);
+        const dateStr = `${String(dObj.getDate()).padStart(2,'0')}.${String(dObj.getMonth()+1).padStart(2,'0')}`;
+        html += `<button class="esc-hist-tab ${isOn?'on':''}" onclick="currentHistDay='${t.d}'; showHistory();">${t.l}<small>${dateStr}</small></button>`;
+    }
+    html += '</div>';
+    
+    const runs = byDay[currentHistDay] || [];
+    
+    if (runs.length) {
+        let dayMaxKm = 0, dayKills = 0, dayStashes = 0, daySearches = 0;
+        const dayLoot = {}, daySpent = {}, dayKillsMap = {};
+        
+        for (let r of runs) {
+            if (r.km > dayMaxKm) dayMaxKm = r.km;
+            if (r.stashes) dayStashes += r.stashes;
+            if (r.stashSearches) daySearches += r.stashSearches;
+            for (let k in r.loot) dayLoot[k] = (dayLoot[k]||0) + r.loot[k];
+            for (let k in r.spent) daySpent[k] = (daySpent[k]||0) + r.spent[k];
+            if (r.kills) {
+                for (let k in r.kills) {
+                    dayKillsMap[k] = (dayKillsMap[k]||0) + r.kills[k];
+                    dayKills += r.kills[k];
+                }
+            }
+        }
+
+        html += '<div class="esc-hist-sum">';
+        html += `<div class="esc-hist-sum-top"><b>${runs.length}</b> забегов · лучший <b>${dayMaxKm} км</b> · мочили <b>${dayKills}</b> · схроны <b>${dayStashes}</b></div>`;
+        
+        const allKeys = new Set([...Object.keys(dayLoot), ...Object.keys(daySpent)]);
+        if (allKeys.size) {
+            html += '<div class="esc-hist-loot">';
+            for (let k of allKeys) {
+                const plus = dayLoot[k] || 0;
+                const minus = daySpent[k] || 0;
+                const net = plus - minus;
+                if (net === 0) continue;
+                const icon = RES_ICONS[k] || '📦';
+                const sign = net > 0 ? '+' : '';
+                const cls = net > 0 ? 'plus' : 'minus';
+                html += `<span class="esc-hist-bit ${cls}">${icon} <b>${sign}${fmtNum(net)}</b></span>`;
+            }
+            html += '</div>';
+        }
+        
+        if (dayStashes > 0 || daySearches > 0) {
+            html += `<div class="esc-hist-meta" style="text-align:center; margin-top:6px;">Схроны за день: <b>${dayStashes} схронов</b> · обысков ${daySearches}</div>`;
+        }
+
+        if (Object.keys(dayKillsMap).length) {
+            html += '<div class="esc-hist-kills-label">Кого мочили за день</div>';
+            html += '<div class="esc-hist-kills">';
+            for (let [k, v] of Object.entries(dayKillsMap).sort((a,b)=>b[1]-a[1])) {
+                const emoji = ENEMY_EMOJIS[k] || '👤';
+                html += `<div class="esc-hist-mob"><span style="font-size:20px;line-height:1;">${emoji}</span><b>x${v}</b></div>`;
+            }
+            html += '</div>';
+        }
+        html += '</div>'; // esc-hist-sum
+        
+        runs.sort((a,b)=>b.t - a.t);
+        for (let r of runs) {
+            const time = new Date(r.t).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+            
+            html += '<div class="esc-hist-card">';
+            html += '<div class="esc-hist-head">';
+            html += `<span class="esc-hist-km">${r.km} КМ</span>`;
+            if (r.stop) {
+                const stopFoes = r.stop.foes || [];
+                if (stopFoes.length) {
+                    const emoji = ENEMY_EMOJIS[stopFoes[0]] || '👤';
+                    const name = ENEMY_NAMES[stopFoes[0]] || 'Враги';
+                    html += `<span class="esc-hist-stop-pill">${emoji} ${name} - не убили</span>`;
+                }
+            }
+            html += `<span class="esc-hist-time" style="margin-left:auto; font-weight:800; font-size:12px; color:#6b5129;">${time}</span>`;
+            html += '</div>';
+            
+            if (r.squad) {
+                html += '<div class="esc-hist-squad">';
+                for (let pos in r.squad) {
+                    const fId = r.squad[pos];
+                    if (fId) {
+                        const fName = FIGHTER_NAMES[fId] || fId;
+                        html += `<div class="hist-squad-ava" title="${fName}">${fName.charAt(0)}</div>`;
+                    }
+                }
+                html += '</div>';
+            }
+            
+            if (r.hvost) {
+                const heat = r.hvost.heat || 0;
+                const foe = r.hvost.foe || 0;
+                const pct = Math.min(100, (heat / 250) * 100);
+                html += `<div style="display:flex; align-items:center; background:#4a3b2a; border-radius:4px; margin-bottom:6px; height:24px; position:relative; overflow:hidden; border:1px solid #3b2a10;">
+                    <div style="background:linear-gradient(90deg, #f0ad4e, #d9534f); width:${pct}%; height:100%; position:absolute; left:0; top:0;"></div>
+                    <div style="position:relative; z-index:1; padding:0 6px; font-size:11px; font-weight:bold; color:#fff; text-shadow:1px 1px 0 #000; display:flex; justify-content:space-between; width:100%;">
+                        <span>🐺 ХВОСТ ${heat}</span><span>враги как на ${foe} км</span>
+                    </div>
+                </div>`;
+            }
+            
+            if (r.stop && r.stop.foes && r.stop.foes.length) {
+                const stopLabel = r.stop.how === 'wipe' ? "Повязали - не убили" : r.stop.how === 'timeout' ? "Время вышло" : "Сдались";
+                html += `<div style="background:#5e2a22; color:#ffb4a8; margin-bottom:6px; padding:6px; border-radius:6px;">
+                    <div style="font-size:11px; font-weight:bold; text-transform:uppercase; margin-bottom:4px;">ОСТАНОВИЛИСЬ</div>
+                    <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">`;
+                for (let f of r.stop.foes) {
+                    const emoji = ENEMY_EMOJIS[f] || '👤';
+                    const name = ENEMY_NAMES[f] || f;
+                    html += `<div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.2); padding:4px; border-radius:6px; min-width:44px;">
+                        <span style="font-size:18px;">${emoji}</span>
+                        <b style="font-size:9px; color:#fff; text-align:center;">${name}</b>
+                    </div>`;
+                }
+                html += `</div>
+                    <div style="font-size:11px; margin-top:4px; color:#fff; font-weight:bold;">${stopLabel}</div>
+                </div>`;
+            }
+            
+            if (r.reason) {
+                html += `<div class="esc-hist-reason">${r.reason}</div>`;
+            }
+            
+            if (r.stashes) {
+                html += `<div class="esc-hist-meta">Схроны: <b>${r.stashes} схронов</b> · обысков ${r.stashSearches||0}</div>`;
+            }
+            
+            const runLoot = r.loot || {}, runSpent = r.spent || {};
+            const runKeys = new Set([...Object.keys(runLoot), ...Object.keys(runSpent)]);
+            if (runKeys.size) {
+                html += `<div class="esc-hist-kills-label" style="text-align:left; margin-top:6px;">ИТОГ</div><div class="esc-hist-loot" style="justify-content:flex-start;">`;
+                for (let k of runKeys) {
+                    const plus = runLoot[k] || 0;
+                    const minus = runSpent[k] || 0;
+                    const net = plus - minus;
+                    if (net === 0) continue;
+                    const icon = RES_ICONS[k] || '📦';
+                    const sign = net > 0 ? '+' : '';
+                    const cls = net > 0 ? 'plus' : 'minus';
+                    html += `<span class="esc-hist-bit ${cls}" style="background:rgba(80,50,10,0.12); color:#2b1d0a;">${icon} <b>${sign}${fmtNum(net)}</b></span>`;
+                }
+                html += `</div>`;
+            }
+            
+            if (r.kills && Object.keys(r.kills).length) {
+                html += `<div class="esc-hist-kills-label" style="text-align:left; margin-top:6px;">Кого мочил</div><div class="esc-hist-kills" style="justify-content:flex-start;">`;
+                for (let [k,v] of Object.entries(r.kills).sort((a,b)=>b[1]-a[1])) {
+                    const emoji = ENEMY_EMOJIS[k] || '👤';
+                    html += `<div class="esc-hist-mob"><span style="font-size:16px;line-height:1;">${emoji}</span><b>x${v}</b></div>`;
+                }
+                html += `</div>`;
+            }
+            
+            if (r.items && r.items.length) {
+                html += `<div class="esc-hist-items">🎁 Шмоток и наколок: ${r.items.length}</div>`;
+            }
+            
+            html += '</div>';
+        }
+    } else {
+        html += '<div style="text-align:center;padding:16px;color:#5d4a2a;font-size:13px;">В этот день забегов не было.</div>';
+    }
+    
+    html += '</div></div>';
+    
+    document.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); 
+    const modal = document.createElement("div"); 
+    modal.className = "col-modal-bg"; 
+    modal.innerHTML = html; 
+    document.body.appendChild(modal);
+}
+
+function openGangMenu() {
+    const st = lastState; if (!st || !st.fighters) return log("Нет данных о бойцах", "error");
+    let html = '<div class="col-modal-box metal-panel" style="max-height:80vh; overflow-y:auto;">';
+    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:12px;">БАНДА</h2>';
+    const fighters = Object.entries(st.fighters).sort((a,b)=>{
+        if (a[1].owned && !b[1].owned) return -1; if (!a[1].owned && b[1].owned) return 1; return (b[1].lvl||0) - (a[1].lvl||0);
     });
-  } else {
-    html += '<div style="text-align:center;padding:10px;color:#777;">Нет данных</div>';
-  }
+    for (const [id, f] of fighters) {
+        const name = FIGHTER_NAMES[id] || id; const isOwned = f.owned; const lvl = f.lvl || 0;
+        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #2a303d; background:${isOwned?'#1b1e26':'#111318'}; margin-bottom:4px; border-radius:4px; opacity:${isOwned?'1':'0.6'};">
+            <div><b style="color:${isOwned?'#fff':'#627080'}; font-size:16px; font-family:'VT323',monospace;">${name}</b>
+            <span style="color:var(--text-muted);font-size:12px;margin-left:8px;">${isOwned?'Ур. '+lvl:(f.unlocked?'Открыт':'Закрыт')}</span></div>
+            <div style="display:flex; gap:4px; align-items:center;">`;
+        if (isOwned) {
+            html += `<input type="number" id="kach-n-${id}" value="1" min="1" max="50" style="width:50px; text-align:center; background:#0a0b0e; color:#fff; border:1px solid #3a4150; border-radius:4px; font-family:'Share Tech Mono',monospace; font-size:16px; padding:4px;">
+                     <button class="btn btn-info sm" onclick="doKach('${id}')" style="padding:4px 8px;">КАЧ</button>`;
+        } else if (f.unlocked) html += `<button class="btn btn-primary sm" onclick="doBuyFighter('${id}')" style="padding:4px 8px;">КУПИТЬ</button>`;
+        else html += `<span style="color:#4a5262; font-size:12px;">Не открыт</span>`;
+        html += `</div></div>`;
+    }
+    html += '</div>'; const modal = document.createElement("div"); modal.className = "col-modal-bg"; modal.innerHTML = html; document.body.appendChild(modal);
+}
 
-  html += '<h2 style="color:var(--accent-green);text-align:center;margin:20px 0 10px;">💚 ТОП ПО УВАЖУХЕ</h2>';
-  if (topUvazh.rows && topUvazh.rows.length) {
-    topUvazh.rows.slice(0, 10).forEach((p, i) => {
-      const isMe = p.name === getNicknameFromToken(token);
-      const place = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.';
-      html += `<div class="rating-row ${isMe?'me':''}">
-        <span class="rating-place">${place}</span>
-        <span class="rating-name">${p.name}</span>
-        <span class="rating-val" style="color:var(--accent-green)">${p.uvazh || 0} ув.</span>
-      </div>`;
-    });
-  } else {
-    html += '<div style="text-align:center;padding:10px;color:#777;">Нет данных</div>';
-  }
-
-  html += '</div>';
-  const modal = document.createElement("div");
-  modal.className = "col-modal-bg";
-  modal.innerHTML = html;
-  document.body.appendChild(modal);
+async function doKach(fid) {
+    const input = $("kach-n-"+fid); const n = parseInt(input.value) || 1;
+    log(`Попытка прокачать ${FIGHTER_NAMES[fid]||fid} на ${n} ур...`, "info");
+    const res = await act("kach", { f:fid, n:n });
+    if (res && res.ok) {
+        log(`✅ Успешно прокачан ${FIGHTER_NAMES[fid]||fid}!`, "success");
+        const st = await getState(); if (st) { lastState = st; updateUI(); }
+        document.body.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); setTimeout(openGangMenu, 100);
+    } else {
+        const errMsg = res?.message || res?.error || "Неизвестная ошибка";
+        log(`❌ Ошибка: ${errMsg}`, "error"); alert(`Ошибка прокачки: ${errMsg}`);
+    }
+}
+async function doBuyFighter(fid) {
+    log(`Покупка бойца ${FIGHTER_NAMES[fid]||fid}...`, "info");
+    const res = await act("buyfighter", { f:fid });
+    if (res && res.ok) {
+        log(`✅ ${FIGHTER_NAMES[fid]||fid} куплен!`, "success");
+        const st = await getState(); if (st) { lastState = st; updateUI(); }
+        document.body.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); setTimeout(openGangMenu, 100);
+    } else {
+        const errMsg = res?.message || res?.error || "Неизвестная ошибка";
+        log(`❌ Ошибка покупки: ${errMsg}`, "error"); alert(`Ошибка покупки: ${errMsg}`);
+    }
 }
 
 function openCollections() {
-  if (!lastState || !lastState.items) return log("Нет данных об инвентаре", "error");
-  
-  let html = '<div class="col-modal-box metal-panel">';
-  html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
-  html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:15px;">ТВОИ КОЛЛЕКЦИИ</h2>';
-  
-  let hasItems = false;
-  for (const [setId, info] of Object.entries(SETS_INFO)) {
-    let minCount = Infinity;
-    for (let i = 0; i < info.pieces; i++) {
-      const c = lastState.items[`${setId}:${i}`] || 0;
-      if (c < minCount) minCount = c;
+    if (!lastState || !lastState.items) return log("Нет данных об инвентаре", "error");
+    let html = '<div class="col-modal-box metal-panel">';
+    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:12px;">ТВОИ КОЛЛЕКЦИИ</h2>';
+    let hasItems = false;
+    for (const [setId, info] of Object.entries(SETS_INFO)) {
+        let minCount = Infinity;
+        for (let i=0; i<info.pieces; i++) { const c = lastState.items[`${setId}:${i}`] || 0; if (c < minCount) minCount = c; }
+        if (minCount === Infinity) minCount = 0;
+        let totalParts = 0; for (let i=0; i<info.pieces; i++) totalParts += (lastState.items[`${setId}:${i}`] || 0);
+        if (totalParts > 0) {
+            hasItems = true;
+            html += `<div class="col-set"><b>${info.name}</b><span>Деталей: ${totalParts} | Готовых сетов: ${minCount}</span><div class="col-btn-row">`;
+            if (minCount > 0) {
+                html += `<button class="btn btn-info sm" onclick="sellSet('${setId}', 1)">Сдать 1</button>`;
+                if (minCount > 1) html += `<button class="btn btn-warning sm" onclick="sellSet('${setId}', ${minCount})">Сдать все (${minCount})</button>`;
+            } else html += `<span style="color:#627080; font-size:13px;">Нужно собрать все 5 деталей</span>`;
+            html += `</div></div>`;
+        }
     }
-    if (minCount === Infinity) minCount = 0;
-    
-    let totalParts = 0;
-    for (let i = 0; i < info.pieces; i++) totalParts += (lastState.items[`${setId}:${i}`] || 0);
-
-    if (totalParts > 0) {
-      hasItems = true;
-      html += `<div class="col-set">
-        <b>${info.name}</b>
-        <span>Деталей: ${totalParts} | Готовых сетов: ${minCount}</span>
-        <div class="col-btn-row">`;
-      
-      if (minCount > 0) {
-        html += `<button class="btn btn-info sm" onclick="sellSet('${setId}', 1)">Сдать 1</button>`;
-        if (minCount > 1) html += `<button class="btn btn-warning sm" onclick="sellSet('${setId}', ${minCount})">Сдать все (${minCount})</button>`;
-      } else {
-        html += `<span style="color:#777; font-size:14px;">Нужно собрать все 5 деталей</span>`;
-      }
-      
-      html += `</div></div>`;
-    }
-  }
-  
-  if (!hasItems) html += '<div style="text-align:center;padding:20px;color:#777;">У тебя нет деталей коллекций.</div>';
-  html += '</div>';
-
-  const modal = document.createElement("div");
-  modal.className = "col-modal-bg";
-  modal.innerHTML = html;
-  document.body.appendChild(modal);
+    if (!hasItems) html += '<div style="text-align:center;padding:16px;color:#627080;">У тебя нет деталей коллекций.</div>';
+    html += '</div>'; const modal = document.createElement("div"); modal.className = "col-modal-bg"; modal.innerHTML = html; document.body.appendChild(modal);
 }
 
 async function sellSet(setId, count) {
-  const res = await act("sellset", { k: setId, n: count });
-  if (res && res.ok) {
-    log(`Успешно сдано: ${setId} x${count}`, "success");
-    document.body.querySelectorAll('.col-modal-bg').forEach(el => el.remove());
-    setTimeout(openCollections, 100);
-  } else {
-    log("Ошибка сдачи: " + (res?.error || "?"), "error");
-  }
+    const setName = SETS_INFO[setId] ? SETS_INFO[setId].name : setId;
+    log(`Сдача набора: ${setName} x${count}`, "warn");
+    const res = await act("sellset", { k:setId, n:count });
+    if (res && (res.ok || res.success || res.sold)) {
+        log(`Успешно сдано: ${setName}`, "success");
+        document.body.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); setTimeout(openCollections, 100);
+    } else log("Ошибка сдачи: " + (res?.message || res?.error || "неизвестная"), "error");
 }
 
-function toggleAutoHelp() {
-  autoHelpEnabled = !autoHelpEnabled;
-  const btn = $("btn-autohold");
-  const info = $("help-info");
-  if (autoHelpEnabled) {
-    btn.innerText = "🛑 ВЫКЛЮЧИТЬ АВТО-ПОМОЩЬ";
-    btn.className = "btn btn-danger btn-full";
-    info.innerText = "Включено. Бот будет помогать при любом удобном случае.";
-    info.style.color = "var(--accent-green)";
-  } else {
-    btn.innerText = "🤝 ВКЛЮЧИТЬ АВТО-ПОМОЩЬ";
-    btn.className = "btn btn-info btn-full";
-    info.innerText = "Выключено";
-    info.style.color = "var(--text-muted)";
-  }
+function applyAutoHelpUI() {
+    const btn = $("btn-autohold"), info = $("help-info"); if (!btn || !info) return;
+    if (autoHelpEnabled) {
+        btn.innerText = "🛑 ВЫКЛЮЧИТЬ АВТО-ПОМОЩЬ"; btn.className = "btn btn-danger btn-full";
+        info.innerText = "Включено. Бот будет помогать при любом удобном случае."; info.style.color = "var(--accent-green)";
+    } else {
+        btn.innerText = "🤝 ВКЛЮЧИТЬ АВТО-ПОМОЩЬ"; btn.className = "btn btn-info btn-full";
+        info.innerText = "Выключено"; info.style.color = "var(--text-muted)";
+    }
 }
+function toggleAutoHelp() { autoHelpEnabled = !autoHelpEnabled; localStorage.setItem('bot_autohelp', autoHelpEnabled); applyAutoHelpUI(); }
 
 function updateUI() {
-  const st = lastState;
-  if (!st) return;
-
-  $("ui-best-km").innerText = st.record || 0;
-  $("ui-uvazh").innerText = st.stats?.uvazh || st.uvazh || 0;
-  
-  const attempts = st.daily?.attempts || 0;
-  const maxRuns = 50 + (st.daily?.extra || 0);
-  $("ui-runs").innerText = `${attempts}/${maxRuns}`;
-  $("ui-cur-km").innerText = st.run ? st.run.km : 0;
-  $("ui-boss-dmg").innerText = (st.dayDmg || 0).toLocaleString();
-  $("ui-total-runs").innerText = (st.stats?.runs || 0).toLocaleString();
-
-  let currentGoal = st.autoCfg?.goal || "km_mid";
-  if (pendingGoal) currentGoal = pendingGoal;
-  
-  const goalMap = { 'km_all':'Агрессивный','km_mid':'Умный','km_safe':'Экономный','nospend':'Без трат','loot':'Схроны','krest':'Могильщик','alive':'Живыми' };
-  $("ui-goal").innerText = goalMap[currentGoal] || currentGoal;
-
-  ["km_mid","km_all","km_safe","loot"].forEach(g => {
-    const b = $("btn-goal-" + g);
-    if (b) b.classList.toggle("active-goal", currentGoal === g);
-  });
-
-  ["zanachki","buter","pills","soap","papirosy","sugar","tainiki","blat","chervontsy"].forEach(k => {
-    const el = $("res-" + k);
-    if (el) el.innerText = getRes(k).toLocaleString();
-  });
-
-  const badge = $("ui-status");
-  if (isRunning && isPaused) {
-    badge.className = "status-badge status-pause";
-    badge.innerText = "ПАУЗА";
-  } else if (isRunning) {
-    badge.className = "status-badge status-run";
-    badge.innerText = runToLimit ? "В ПУТИ" : `БАТЧ ${batchDone}/${batchTarget}`;
-  } else {
-    badge.className = "status-badge status-stop";
-    badge.innerText = "ОСТАНОВЛЕН";
-  }
-
-  $("btn-pause").style.display  = (isRunning && !isPaused) ? "block" : "none";
-  $("btn-resume").style.display = (isRunning &&  isPaused) ? "block" : "none";
-  $("btn-cancel").style.display = isRunning ? "block" : "none";
-
-  if (isRunning || batchDone > 0) {
-    $("batch-progress-cont").style.display = "block";
-    if (runToLimit) {
-      const pct = Math.min(100, (attempts / maxRuns) * 100);
-      $("batch-progress-bar").style.width = pct + "%";
-      $("batch-progress-text").innerText = `ДЕНЬ: ${attempts} / ${maxRuns}`;
-    } else if (batchTarget > 0) {
-      const pct = Math.min(100, (batchDone / batchTarget) * 100);
-      $("batch-progress-bar").style.width = pct + "%";
-      $("batch-progress-text").innerText = `БАТЧ: ${batchDone} / ${batchTarget}`;
-    }
-  } else {
-    $("batch-progress-cont").style.display = "none";
-  }
-  
-  updateSessionUI();
+    const st = lastState; if (!st) return;
+    $("ui-best-km").innerText = fmtNum(st.record || 0);
+    $("ui-uvazh").innerText = mySeasonUvazh !== null ? fmtNum(mySeasonUvazh) : fmtNum(st.stats?.uvazh || st.uvazh || 0);
+    
+    const attempts = st.daily?.attempts || 0; const maxRuns = 50 + (st.daily?.extra || 0);
+    // Показываем реальное количество забегов из статистики (как на скрине)
+    $("ui-runs").innerText = fmtNum(st.stats?.runs || 0); 
+    
+    $("ui-cur-km").innerText = fmtNum(st.run ? st.run.km : 0);
+    
+    // Берем км за сегодня напрямую из API
+    $("ui-day-km").innerText = fmtNum(st.dayKm || 0);
+    
+    $("ui-boss-dmg").innerText = fmtNum(st.dayDmg || 0);
+    
+    let currentGoal = st.autoCfg?.goal || "km_mid"; if (pendingGoal) currentGoal = pendingGoal;
+    $("ui-goal").innerText = GOAL_NAMES[currentGoal] || currentGoal;
+    ["km_mid","km_all","km_safe","loot","nospend","krest","alive"].forEach(g => {
+        const b = $("btn-goal-"+g); if (b) b.classList.toggle("active-goal", currentGoal === g);
+    });
+    
+    renderResources();
+    renderDaySummary(st);
+    
+    const badge = $("ui-status");
+    if (isRunning && isPaused) { badge.className = "status-badge status-pause"; badge.innerText = "ПАУЗА"; }
+    else if (isRunning) { badge.className = "status-badge status-run"; badge.innerText = runToLimit ? "В ПУТИ" : `БАТЧ ${batchDone}/${batchTarget}`; }
+    else { badge.className = "status-badge status-stop"; badge.innerText = "ОСТАНОВЛЕН"; }
+    $("btn-pause").style.display  = (isRunning && !isPaused) ? "block" : "none";
+    $("btn-resume").style.display = (isRunning &&  isPaused) ? "block" : "none";
+    $("btn-cancel").style.display = isRunning ? "block" : "none";
+    if (isRunning || batchDone > 0) {
+        $("batch-progress-cont").style.display = "block";
+        if (runToLimit) { const pct = Math.min(100, (attempts/maxRuns)*100); $("batch-progress-bar").style.width = pct + "%"; $("batch-progress-text").innerText = `ДЕНЬ: ${attempts} / ${maxRuns}`; }
+        else if (batchTarget > 0) { const pct = Math.min(100, (batchDone/batchTarget)*100); $("batch-progress-bar").style.width = pct + "%"; $("batch-progress-text").innerText = `БАТЧ: ${batchDone} / ${batchTarget}`; }
+    } else $("batch-progress-cont").style.display = "none";
 }
 
 async function startStateLoop() {
-  while (true) {
-    const state = await getState();
-    if (state) { lastState = state; lastStateTime = Date.now(); updateUI(); }
-    if (!isBossHitting) refreshBossInfo();
-    
-    if (autoHelpEnabled && state && state.run) {
-      await triggerAutoHelp();
+    while (true) {
+        const state = await getState();
+        if (state) { lastState = state; lastStateTime = Date.now(); updateUI(); }
+        const nowMsk = new Date().toLocaleDateString('ru-RU', {timeZone:'Europe/Moscow'});
+        if (nowMsk !== currentMskDay) { currentMskDay = nowMsk; bossDeadToday = false; log("Новый день по МСК. Смотритель обновился.", "info"); }
+        if (Date.now() - lastUvazhFetch > 30000) {
+            const uvData = await apiGet("/escape/uvazh-rating");
+            if (uvData && uvData.me) { myDisplayName = uvData.me.name; mySeasonUvazh = uvData.me.uvazh; $("ui-nickname").innerText = myDisplayName; $("ui-uvazh").innerText = fmtNum(mySeasonUvazh); }
+            lastUvazhFetch = Date.now();
+        }
+        if (!isBossHitting) refreshBossInfo();
+        if (autoHelpEnabled && state && state.run) await triggerAutoHelp();
+        await new Promise(r=>setTimeout(r, 3000));
     }
-    
-    await new Promise(r => setTimeout(r, 3000));
-  }
 }
 
-function setBatch(n) { $("in-batch").value = n; }
+function setBatch(n) { $("in-batch").value = n; localStorage.setItem('bot_batch', n); }
 
 async function startBatch(n, isLimit) {
-  if (isRunning) { alert("Уже запущено! Сначала останови текущий."); return; }
-  
-  if (!isLimit) {
-    if (isNaN(n) || n <= 0) return alert("Введи нормальное число забегов!");
-    const word = plural(n, ['забег', 'забега', 'забегов']);
-    if (!confirm(`Начать бежать ровно ${n} ${word}?`)) return;
-  } else {
-    if (!confirm(`Начать бежать до дневного лимита?`)) return;
-  }
-
-  if (pendingGoal) {
-    log("Применяю отложенную тактику: " + pendingGoal, "warn");
-    await setGoal(pendingGoal);
-    pendingGoal = null;
-  }
-
-  runToLimit = isLimit;
-  batchTarget = isLimit ? 0 : n; 
-  batchDone = 0;
-  
-  log(runToLimit ? `▶ Запуск: БЕГ ДО ЛИМИТА` : `▶ Запуск: ${n} ${plural(n, ['забег', 'забега', 'забегов'])}`, "warn");
-  isRunning = true; isPaused = false;
-  updateUI();
-  runLoop();
+    if (isRunning) { alert("Уже запущено!"); return; }
+    if (!isLimit) {
+        if (isNaN(n) || n <= 0) return alert("Введи нормальное число!");
+        if (!confirm(`Начать бежать ровно ${n} ${plural(n, ['забег','забега','забегов'])}?`)) return;
+    } else if (!confirm(`Начать бежать до дневного лимита?`)) return;
+    if (pendingGoal) { await setGoal(pendingGoal); pendingGoal = null; }
+    runToLimit = isLimit; batchTarget = isLimit ? 0 : n; batchDone = 0; lastKmInRun = 0;
+    log(runToLimit ? `▶ Запуск: БЕГ ДО ЛИМИТА` : `▶ Запуск: ${n} ${plural(n,['забег','забега','забегов'])}`, "warn");
+    isRunning = true; isPaused = false; updateUI(); runLoop();
 }
-
-function pauseRun() {
-  if (!isRunning || isPaused) return;
-  isPaused = true;
-  log("⏸ ПАУЗА", "warn");
-  updateUI();
-}
-
-function resumeRun() {
-  if (!isRunning || !isPaused) return;
-  isPaused = false;
-  log("▶ ПРОДОЛЖАЕМ", "success");
-  updateUI();
-  runLoop();
-}
-
-function cancelBatch() {
-  if (!confirm("Точно остановить забеги? Текущий забег останется висеть.")) return;
-  isRunning = false; isPaused = false;
-  batchTarget = 0; batchDone = 0; runToLimit = false;
-  updateUI();
-  log("✕ ЗАБЕГИ ОСТАНОВЛЕНЫ", "warn");
-}
+function pauseRun() { if (!isRunning || isPaused) return; isPaused = true; log("⏸ ПАУЗА", "warn"); updateUI(); }
+function resumeRun() { if (!isRunning || !isPaused) return; isPaused = false; log("▶ ПРОДОЛЖАЕМ", "success"); updateUI(); runLoop(); }
+function cancelBatch() { if (!confirm("Остановить забеги?")) return; isRunning = false; isPaused = false; batchTarget = 0; batchDone = 0; runToLimit = false; updateUI(); log("✕ ОСТАНОВЛЕНЫ", "warn"); }
 
 async function resetRun() {
-  if (isResetting) return;
-  if (!confirm("⚠️ ВНИМАНИЕ! Бот сдастся (потеряет текущий км) и начнет заново. Уверен?")) return;
-  
-  isResetting = true;
-  const wasRunning = isRunning;
-  isRunning = false; isPaused = false;
-  updateUI();
-  log("🔄 СБРОС ЗАБЕГА...", "warn");
-  
-  try {
-    await act("surrender");
-    await new Promise(r => setTimeout(r, 200));
-    await act("caughtok");
-    await new Promise(r => setTimeout(r, 200));
-    lastKmInRun = 0;
-    batchDone = 0;
-    lastState = null; lastStateTime = 0;
-    const st = await getState();
-    if (st) { lastState = st; lastStateTime = Date.now(); }
-    updateUI();
-    log("✓ Забег сброшен", "success");
-  } catch (e) { log("Ошибка сброса: " + e.message, "error"); }
-  
-  isResetting = false;
-  if (wasRunning) { isRunning = true; isPaused = false; runLoop(); }
+    if (isResetting) return; if (!confirm("⚠️ Сдаться и начать заново?")) return;
+    isResetting = true; const wasRunning = isRunning; isRunning = false; isPaused = false; updateUI(); log("🔄 СБРОС ЗАБЕГА...", "warn");
+    try {
+        await act("surrender"); await new Promise(r=>setTimeout(r, 200)); await act("caughtok"); await new Promise(r=>setTimeout(r, 200));
+        lastKmInRun = 0; batchDone = 0; lastState = null; lastStateTime = 0;
+        const st = await getState(); if (st) { lastState = st; lastStateTime = Date.now(); }
+        updateUI(); log("✓ Забег сброшен", "success");
+    } catch (e) { log("Ошибка сброса: " + e.message, "error"); }
+    isResetting = false; if (wasRunning) { isRunning = true; isPaused = false; runLoop(); }
 }
 
 async function triggerAutoHelp() {
-  try {
-    const convoy = await apiGet("/escape/convoy");
-    if (!convoy || !convoy.mates || !convoy.mates.length) return;
-    
-    for (const mate of convoy.mates) {
-      if (mate.owed) continue;
-      
-      const gifts = ["trail", "buter", "pills", "cover"];
-      for (const g of gifts) {
-        const r = await apiPost("/escape/convoy/give", { to: mate.id, kind: g });
-        if (r && r.success) {
-           session.help++;
-           updateSessionUI();
-           log(`Помог: ${mate.name} (${g})`, "success");
-           await new Promise(res => setTimeout(res, 300));
-           break;
+    try {
+        const convoy = await apiGet("/escape/convoy");
+        if (!convoy || !convoy.mates || !convoy.mates.length) return;
+        for (const mate of convoy.mates) {
+            if (mate.owed) continue; 
+            if (mate.left !== undefined && mate.left <= 0) continue; 
+            
+            let gifts = ["trail", "cover", "pills", "buter"];
+            if (mate.dead === 0) {
+                gifts = ["trail", "pills", "buter"];
+            } else {
+                gifts = ["cover", "trail", "pills", "buter"]; 
+            }
+
+            for (const g of gifts) {
+                if (g === "pills" || g === "buter") {
+                    const ck = mate.id + ":" + g;
+                    if (failedHelps[ck] && Date.now() - failedHelps[ck] < 300000) continue;
+                }
+
+                const r = await apiPost("/escape/convoy/give", { to:mate.id, kind:g });
+                if (r && (r.success || r.ok)) {
+                    session.help++; 
+                    trackHelp(mate.name, g);
+                    updateSessionUI();
+                    log(`Помог: ${mate.name} (${GIFT_NAMES[g]})`, "success");
+                    await new Promise(res=>setTimeout(res, 300));
+                    break;
+                } else if (r && r.error) {
+                    failedHelps[mate.id + ":" + g] = Date.now();
+                }
+            }
         }
-      }
-    }
-  } catch (e) {}
+    } catch(e) {}
 }
 
 async function runLoop() {
-  if (!isRunning || isPaused || isResetting) return;
-
-  let st = lastState;
-  if (!st || Date.now() - lastStateTime > 2000) {
-    st = await getState();
-    if (!st) { setTimeout(runLoop, 800); return; }
-    lastState = st; lastStateTime = Date.now();
-    updateUI();
-  }
-
-  const maxRuns = 50 + (st.daily?.extra || 0);
-  const attempts = st.daily?.attempts || 0;
-
-  if (runToLimit && attempts >= maxRuns) {
-    log(`✅ ДОСТИГНУТ ДНЕВНОЙ ЛИМИТ (${attempts}/${maxRuns})`, "success");
-    isRunning = false; runToLimit = false; updateUI(); return;
-  }
-  if (!runToLimit && batchDone >= batchTarget) {
-    log(`✅ БАТЧ ЗАВЕРШЁН (${batchDone}/${batchTarget})`, "success");
-    isRunning = false; batchTarget = 0; updateUI(); return;
-  }
-
-  if (Date.now() < cooldownUntil) {
-    setTimeout(runLoop, Math.max(30, cooldownUntil - Date.now() + 30));
-    return;
-  }
-
-  const run = st.run;
-
-  if (!run) {
-    if (pendingGoal) {
-      log("Применяю отложенную тактику: " + pendingGoal, "warn");
-      await setGoal(pendingGoal);
-      pendingGoal = null;
+    if (!isRunning || isPaused || isResetting) return;
+    let st = lastState;
+    if (!st || Date.now() - lastStateTime > 2000) {
+        st = await getState(); if (!st) { setTimeout(runLoop, 800); return; }
+        lastState = st; lastStateTime = Date.now(); updateUI();
     }
-
-    const res = await act("start");
-    if (res.ok) {
-      log("▶ Забег начат", "success");
-      await act("auto", { on: true });
-    } else if (res.error !== "429" && res.error !== "Net") {
-      if (attempts >= maxRuns) {
-        log("🚫 ЛИМИТ ЗАБЕГОВ", "error");
-        isRunning = false; runToLimit = false; updateUI(); return;
-      }
-      log("Старт: " + (res.error || "неизвестная ошибка"), "error");
-      await new Promise(r => setTimeout(r, 500));
+    const maxRuns = 50 + (st.daily?.extra || 0); const attempts = st.daily?.attempts || 0;
+    if (runToLimit && attempts >= maxRuns) { log(`✅ ЛИМИТ (${attempts}/${maxRuns})`, "success"); isRunning = false; runToLimit = false; updateUI(); return; }
+    if (!runToLimit && batchDone >= batchTarget) { log(`✅ БАТЧ ЗАВЕРШЁН (${batchDone}/${batchTarget})`, "success"); isRunning = false; batchTarget = 0; updateUI(); return; }
+    if (Date.now() < cooldownUntil) { setTimeout(runLoop, Math.max(30, cooldownUntil - Date.now() + 30)); return; }
+    const run = st.run;
+    if (!run) {
+        if (pendingGoal) { await setGoal(pendingGoal); pendingGoal = null; }
+        const res = await act("start");
+        if (res.ok) { log("▶ Забег начат", "success"); await act("auto", { on:true }); }
+        else if (res.error !== "429" && res.error !== "Net") {
+            if (attempts >= maxRuns) { log("🚫 ЛИМИТ", "error"); isRunning = false; runToLimit = false; updateUI(); return; }
+            log("Старт: " + (res.message || res.error || "неизвестная"), "error"); await new Promise(r=>setTimeout(r, 500));
+        }
+        setTimeout(runLoop, 30); return;
     }
-    setTimeout(runLoop, 30);
-    return;
-  }
-
-  if (!run.auto) {
-    await act("auto", { on: true });
-    setTimeout(runLoop, 20);
-    return;
-  }
-
-  if (run.km > lastKmInRun) {
-    const diff = run.km - lastKmInRun;
-    session.km += diff;
-    updateSessionUI();
-    lastKmInRun = run.km;
-    const el = $("ui-cur-km"); if (el) el.innerText = run.km;
-  }
-
-  const phase = run.phase;
-
-  if (phase === "battle") {
-    await act("auto_burst", { n: 50, _fast: true, collapse: true });
-  } else if (phase === "victory") {
-    await act("victoryok");
-  } else if (phase === "caught") {
-    await act("caughtok");
-    batchDone++;
-    session.runs++;
-    updateSessionUI();
-    lastKmInRun = 0;
-    if ($("ui-cur-km")) $("ui-cur-km").innerText = 0;
-    updateUI();
-  } else if (phase === "event") {
-    await act("auto_step");
-  } else if (phase === "road") {
-    await act("auto_step");
-  }
-
-  if (isRunning) setTimeout(runLoop, 0);
+    if (!run.auto) { await act("auto", { on:true }); setTimeout(runLoop, 20); return; }
+    if (run.km > lastKmInRun) {
+        const diff = run.km - lastKmInRun; session.km += diff; updateSessionUI(); lastKmInRun = run.km;
+        const el = $("ui-cur-km"); if (el) el.innerText = fmtNum(run.km);
+    }
+    const phase = run.phase;
+    if (phase === "battle") await act("auto_burst", { n:50, _fast:true, collapse:true });
+    else if (phase === "victory") await act("victoryok");
+    else if (phase === "caught") { 
+        await act("caughtok"); 
+        batchDone++; session.runs++; updateSessionUI(); lastKmInRun = 0; 
+        if ($("ui-cur-km")) $("ui-cur-km").innerText = "0"; 
+        updateUI(); 
+    }
+    else if (phase === "event") await act("auto_step");
+    else if (phase === "road") await act("auto_step");
+    if (isRunning) setTimeout(runLoop, 0);
 }
 
 async function refreshBossInfo() {
-  const data = await apiGet("/escape/daily-boss");
-  if (!data || !$("boss-info")) return null;
-  const hp = data.hp || 0, maxHp = data.max_hp || 1;
-  const taps = data.me?.taps_left || 0;
-  const power = data.me?.tap_power || 1;
-  const dmg = data.me?.damage || 0;
-  const dayKm = data.me?.day_km || 0;
-
-  if (data.killed) {
-    $("boss-info").innerHTML = `💀 <b style="color:var(--accent-red)">ПОВЕРЖЕН</b> · урон: <b>${dmg.toLocaleString()}</b>`;
-  } else {
-    $("boss-info").innerHTML = `HP: <b>${hp.toLocaleString()}</b> / ${maxHp.toLocaleString()}<br>` +
-      `тыки: <b style="color:var(--accent-yellow)">${taps}</b> (${dayKm} км) · сила ×${power}`;
-  }
-  $("ui-boss-dmg").innerText = dmg.toLocaleString();
-  return data;
+    if (bossDeadToday && !isBossHitting) return null;
+    const data = await apiGet("/escape/daily-boss"); if (!data || !$("boss-info")) return null;
+    const hp = data.hp || 0, maxHp = data.max_hp || 1; const taps = data.me?.taps_left || 0;
+    const power = data.me?.tap_power || 1; const dmg = data.me?.damage || 0; const dayKm = data.me?.day_km || 0;
+    if (data.killed) { if (!bossDeadToday) { log("💀 СМОТРИТЕЛЬ ПОВЕРЖЕН", "success"); bossDeadToday = true; } $("boss-info").innerHTML = `💀 <b style="color:var(--accent-red)">ПОВЕРЖЕН</b> · урон: <b>${fmtNum(dmg)}</b>`; }
+    else { bossDeadToday = false; $("boss-info").innerHTML = `HP: <b>${fmtNum(hp)}</b> / ${fmtNum(maxHp)}<br>тыки: <b style="color:var(--accent-yellow)">${taps}</b> (${dayKm} км) · сила ×${power}`; }
+    $("ui-boss-dmg").innerText = fmtNum(dmg); return data;
 }
 
 function startBoss() {
-  if (!confirm("Начать тыкать Смотрителя? Будут потрачены все доступные тыки.")) return;
-  isBossHitting = true;
-  $("btn-boss-hit").style.display = "none";
-  $("btn-boss-stop").style.display = "block";
-  bossLoop();
+    if (bossDeadToday) { alert("Смотритель мертв."); return; }
+    if (!confirm("Начать тыкать?")) return;
+    isBossHitting = true; $("btn-boss-hit").style.display = "none"; $("btn-boss-stop").style.display = "block"; bossLoop();
 }
-
-function stopBoss() {
-  isBossHitting = false;
-  $("btn-boss-hit").style.display = "block";
-  $("btn-boss-stop").style.display = "none";
-}
+function stopBoss() { isBossHitting = false; $("btn-boss-hit").style.display = "block"; $("btn-boss-stop").style.display = "none"; }
 
 async function bossLoop() {
-  if (!isBossHitting) return;
-  const data = await refreshBossInfo();
-  if (!data) { setTimeout(bossLoop, 2000); return; }
-  if (data.killed) { log("✅ СМОТРИТЕЛЬ МЕРТВ", "success"); stopBoss(); return; }
-  
-  let tapsLeft = data.me?.taps_left || 0;
-  if (tapsLeft <= 0) { log("Нет тыков (беги км)", "warn"); stopBoss(); return; }
-
-  let delay = 40;
-
-  while (tapsLeft > 0 && isBossHitting) {
-    const batch = Math.min(500, tapsLeft);
-    const r = await apiPost("/escape/daily-boss/tap", { count: batch });
-    
-    if (!r) {
-      await new Promise(res => setTimeout(res, 1000));
-      continue;
+    if (!isBossHitting) return;
+    const data = await refreshBossInfo(); if (!data) { setTimeout(bossLoop, 2000); return; }
+    if (data.killed) { log("✅ СМОТРИТЕЛЬ МЕРТВ", "success"); stopBoss(); return; }
+    let tapsLeft = data.me?.taps_left || 0; if (tapsLeft <= 0) { log("Нет тыков", "warn"); stopBoss(); return; }
+    let delay = 40;
+    while (tapsLeft > 0 && isBossHitting) {
+        const batch = Math.min(500, tapsLeft); const r = await apiPost("/escape/daily-boss/tap", { count:batch });
+        if (!r) { await new Promise(res=>setTimeout(res, 1000)); continue; }
+        if (r.error === "429" || (r.message && r.message.includes("429")) || r.error === "cooldown") { delay = Math.min(delay + 100, 1000); log("Сервер притормаживает...", "warn"); await new Promise(res=>setTimeout(res, delay)); continue; }
+        if (!r.success && !r.ok) { log("Тык: " + (r.message || r.error || "?"), "error"); break; }
+        delay = Math.max(20, delay - 10); tapsLeft = r.me?.taps_left || 0; const dmg = r.me?.damage || 0;
+        session.bossDmg = dmg; updateSessionUI(); $("ui-boss-dmg").innerText = fmtNum(dmg);
+        $("boss-info").innerHTML = `Тыки: <b style="color:var(--accent-yellow)">${tapsLeft}</b> · Урон: <b>${fmtNum(dmg)}</b>`;
+        if (r.killed) { log("✅ СМОТРИТЕЛЬ ПОВЕРЖЕН", "success"); stopBoss(); return; }
+        await new Promise(res=>setTimeout(res, delay));
     }
-
-    if (r.error === "429" || (r.message && r.message.includes("429")) || r.error === "cooldown") {
-      delay = Math.min(delay + 100, 1000);
-      log("Сервер притормаживает...", "warn");
-      await new Promise(res => setTimeout(res, delay));
-      continue;
-    }
-
-    if (!r.success) { 
-      log("Тык: " + (r.error || "?"), "error"); 
-      break; 
-    }
-
-    delay = Math.max(20, delay - 10);
-
-    tapsLeft = r.me?.taps_left || 0;
-    const dmg = r.me?.damage || 0;
-    session.bossDmg = dmg;
-    updateSessionUI();
-    $("ui-boss-dmg").innerText = dmg.toLocaleString();
-    $("boss-info").innerHTML = `Тыки: <b style="color:var(--accent-yellow)">${tapsLeft}</b> · Урон: <b>${dmg.toLocaleString()}</b>`;
-    
-    if (r.killed) { 
-      log("✅ СМОТРИТЕЛЬ ПОВЕРЖЕН", "success"); 
-      stopBoss(); 
-      return; 
-    }
-    
-    await new Promise(res => setTimeout(res, delay));
-  }
-  stopBoss();
+    stopBoss();
 }
 
 async function collectAll() {
-  if (isCollecting) return;
-  isCollecting = true;
-  log("🔄 СБОР НАГРАД...", "warn");
-  try {
-    const road = await apiGet("/escape/kmroad");
-    if (road && road.steps) {
-      let n = 0;
-      for (const s of road.steps) {
-        if (s.reached && !s.claimed) {
-          const r = await apiPost("/escape/kmroad/claim", { km: s.km });
-          if (r && r.success) n++;
-          await new Promise(res => setTimeout(res, 180));
+    if (isCollecting) return; isCollecting = true; log("🔄 СБОР НАГРАД...", "warn");
+    try {
+        const road = await apiGet("/escape/kmroad");
+        if (road && road.steps) {
+            let n = 0;
+            for (const s of road.steps) {
+                if (s.reached && !s.claimed) { const r = await apiPost("/escape/kmroad/claim", { km:s.km }); if (r && (r.success || r.ok)) n++; await new Promise(res=>setTimeout(res, 180)); }
+            }
+            if (n > 0) log(`🛤 Дорога: +${n} наград`, "success");
         }
-      }
-      if (n > 0) log(`🛤 Дорога: +${n} наград`, "success");
-    }
-    const inc = await apiGet("/escape/merc/income");
-    if (inc && inc.unseen > 0) {
-      await apiPost("/escape/merc/income", { seen: true });
-      log(`💰 Наёмники: новых ${inc.unseen}`, "success");
-    }
-    const st = await getState();
-    if (st) { lastState = st; lastStateTime = Date.now(); updateUI(); }
-    log("✅ СБОР ЗАВЕРШЁН", "success");
-  } catch (e) { log("Ошибка сбора: " + e.message, "error"); }
-  isCollecting = false;
+        const inc = await apiGet("/escape/merc/income");
+        if (inc && inc.unseen > 0) { await apiPost("/escape/merc/income", { seen:true }); log(`💰 Наёмники: новых ${inc.unseen}`, "success"); }
+        const st = await getState(); if (st) { lastState = st; lastStateTime = Date.now(); updateUI(); }
+        log("✅ СБОР ЗАВЕРШЁН", "success");
+    } catch (e) { log("Ошибка сбора: " + e.message, "error"); }
+    isCollecting = false;
 }
 
-async function showKmRoad() {
-  const road = await apiGet("/escape/kmroad");
-  if (!road || !road.steps) { log("Дорога недоступна", "error"); return; }
-  
-  let html = 'ДОРОГА ВОЛИ\n\n';
-  html += `Пройдено: ${road.record || 0} км\n\n`;
-  
-  road.steps.forEach(s => {
-    const status = s.claimed ? '✅' : s.reached ? '🎁' : '🔒';
-    html += `${status} ${s.km} км — ${s.name || ''}\n`;
-  });
-  
-  alert(html);
+function updateFineTuneBtns(key, val) {
+    const container = document.getElementById(`cfg-btns-${key}`);
+    if (!container) return;
+    container.innerHTML = FINE_TUNE_CFG[key].options.map(opt => {
+        const isActive = opt.v === val;
+        const cls = isActive ? "btn btn-warning sm active-cfg" : "btn btn-info sm";
+        return `<button class="${cls}" onclick="event.preventDefault(); setFineTune('${key}', '${opt.v}')">${opt.l}</button>`;
+    }).join('');
 }
+
+function openFineTune() {
+    if (!lastState) return log("Нет данных", "error");
+    let html = '<div class="col-modal-box metal-panel" style="max-height:80vh; overflow-y:auto;">';
+    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:8px;font-family:\'VT323\',monospace;letter-spacing:2px;font-size:22px;">⚙ ТОНКАЯ НАСТРОЙКА</h2>';
+    html += '<div style="text-align:center;font-size:13px;color:var(--text-muted);margin-bottom:12px;">Нажми на название, чтобы раскрыть описание и увидеть кнопки.</div>';
+    
+    for (const [key, cfg] of Object.entries(FINE_TUNE_CFG)) {
+        const current = (lastState.autoCfg && lastState.autoCfg[key]) || (cfg.options[0] && cfg.options[0].v);
+        
+        html += `<details class="cfg-details">
+            <summary>${cfg.title}</summary>
+            <div class="cfg-content">
+                <div class="cfg-btns" id="cfg-btns-${key}">
+                    ${cfg.options.map(opt => {
+                        const isActive = opt.v === current;
+                        const cls = isActive ? "btn btn-warning sm active-cfg" : "btn btn-info sm";
+                        return `<button class="${cls}" onclick="event.preventDefault(); setFineTune('${key}', '${opt.v}')">${opt.l}</button>`;
+                    }).join('')}
+                </div>
+                <div class="cfg-desc">
+                    ${cfg.options.map(opt => `<div style="margin-bottom:6px;"><b>${opt.l}:</b> ${opt.d || 'Нет описания'}</div>`).join('')}
+                </div>
+            </div>
+        </details>`;
+    }
+    html += '</div>';
+    const modal = document.createElement("div"); modal.className = "col-modal-bg"; modal.id = "fine-tune-modal";
+    modal.innerHTML = html; document.body.appendChild(modal);
+}
+
+async function setFineTune(key, value) {
+    if (!FINE_TUNE_CFG[key]) return;
+    const res = await act("autocfg", { k:key, v:value });
+    if (res && res.ok) {
+        if (lastState) { lastState.autoCfg = lastState.autoCfg || {}; lastState.autoCfg[key] = value; }
+        localStorage.setItem('bot_cfg_'+key, value);
+        log(`⚙ ${FINE_TUNE_CFG[key].title}: изменено`, "success");
+        updateFineTuneBtns(key, value);
+    } else log(`Ошибка настройки: ${res?.message || res?.error || "неизвестная"}`, "error");
+}
+
+function fmtTime(ms) { const d = new Date(ms); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0'); }
+function pct(a, b) { return b > 0 ? Math.round(a/b*1000)/10 : 0; }
+
+function buildStatsReport() {
+    const el = (Date.now() - statsData.sessionStart) / 60000; const avgPing = statsAvgPing();
+    const errPct = pct(statsData.errors, statsData.total); const expPct = pct(statsData.expectedErrors, statsData.total);
+    let txt = `=== СТАТИСТИКА БОТА v54 ===\n`;
+    txt += `Сессия: ${Math.round(el)} мин\nСредний пинг: ${avgPing} мс\nВсего запросов: ${statsData.total}\n`;
+    txt += `Реальных ошибок: ${statsData.errors} (${errPct}%)\nОжидаемых 400: ${statsData.expectedErrors} (${expPct}%)\n`;
+    txt += `Скорость сейчас: ${statsRpm()}/мин, ${statsRph()}/час\nСредняя за сессию: ${statsAvgRpm()}/мин\n\n`;
+    txt += `--- ПО ЭНДПОИНТАМ ---\n`;
+    const eps = Object.entries(statsData.endpoints).sort((a,b)=>b[1].count - a[1].count);
+    for (const [ep, d] of eps) {
+        const avgMs = d.count ? Math.round(d.sumMs / d.count) : 0;
+        txt += `${ep}: ${d.count} зап. (${d.err} реал, ${d.expectedErr} ожид., ср. ${avgMs}мс)\n`;
+        const ops = Object.entries(d.ops).sort((a,b)=>b[1].count - a[1].count);
+        for (const [op, od] of ops) txt += `   ├ ${op}: ${od.count} (${od.err} реал, ${od.expectedErr} ожид.)\n`;
+    }
+    if (statsData.recentErrors.length) {
+        txt += `\n--- ПОСЛЕДНИЕ ОШИБКИ ---\n`;
+        for (const e of statsData.recentErrors) txt += `[${fmtTime(e.t)}] ${e.endpoint}${e.op ? ' ('+e.op+')' : ''} → ${e.status} ${e.msg} ${e.expected ? '(ОЖИД.)' : ''}\n`;
+    }
+    return txt;
+}
+
+function showStats() {
+    const el = (Date.now() - statsData.sessionStart) / 60000; const avgPing = statsAvgPing();
+    const errPct = pct(statsData.errors, statsData.total); const expPct = pct(statsData.expectedErrors, statsData.total);
+
+    let html = '<div class="col-modal-box metal-panel wide" style="max-height:85vh; overflow-y:auto;">';
+    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:8px;font-family:\'VT323\',monospace;letter-spacing:2px;font-size:20px;">📊 СТАТИСТИКА ЗАПРОСОВ</h2>';
+
+    html += '<div class="stats-summary">';
+    html += `<div class="stat-box"><div class="stat-label">Пинг ср.</div><div class="stat-val highlight">${avgPing}<span style="font-size:12px;color:#627080">мс</span></div></div>`;
+    html += `<div class="stat-box"><div class="stat-label">Запросов</div><div class="stat-val">${statsData.total}</div></div>`;
+    html += `<div class="stat-box"><div class="stat-label">Реал. ошибок</div><div class="stat-val boss">${statsData.errors} <span style="font-size:12px;color:#627080">(${errPct}%)</span></div></div>`;
+    html += `<div class="stat-box"><div class="stat-label">Ожид. 400</div><div class="stat-val" style="color:#f0ad4e">${statsData.expectedErrors} <span style="font-size:12px;color:#627080">(${expPct}%)</span></div></div>`;
+    html += '</div>';
+
+    html += '<div class="section-title">⚡ Скорость</div>';
+    html += '<table class="stats-table"><tr><th>Сейчас в минуте</th><th>Сейчас в часе</th><th>Средняя за сессию</th></tr>';
+    html += `<tr><td class="num ok-col">${statsRpm()}/мин</td><td class="num ok-col">${statsRph()}/час</td><td class="num">${statsAvgRpm()}/мин</td></tr></table>`;
+
+    html += '<div class="section-title">📡 По эндпоинтам</div>';
+    const eps = Object.entries(statsData.endpoints).sort((a,b)=>b[1].count - a[1].count);
+    if (eps.length) {
+        html += '<table class="stats-table"><tr><th>Эндпоинт</th><th>Запросов</th><th>Реал. ош.</th><th>Ожид. 400</th><th>Ср. мс</th></tr>';
+        for (const [ep, d] of eps) {
+            const avgMs = d.count ? Math.round(d.sumMs / d.count) : 0;
+            html += `<tr><td>${ep}</td><td class="num">${d.count}</td><td class="num err-col">${d.err||'-'}</td><td class="num" style="color:#f0ad4e">${d.expectedErr||'-'}</td><td class="num">${avgMs}</td></tr>`;
+            const ops = Object.entries(d.ops).sort((a,b)=>b[1].count - a[1].count);
+            if (ops.length > 1) {
+                for (const [op, od] of ops) html += `<tr style="font-size:12px;opacity:0.85"><td style="padding-left:16px;color:#627080">↳ ${op}</td><td class="num">${od.count}</td><td class="num err-col">${od.err||'-'}</td><td class="num" style="color:#f0ad4e">${od.expectedErr||'-'}</td><td></td></tr>`;
+            }
+        }
+        html += '</table>';
+    } else html += '<div style="text-align:center;padding:10px;color:#627080;">Пока нет запросов</div>';
+
+    html += '<div class="section-title">❌ Последние ошибки</div>';
+    if (statsData.recentErrors.length) {
+        for (const e of statsData.recentErrors.slice(0, 10)) {
+            const color = e.expected ? '#f0ad4e' : '#d9534f';
+            const label = e.expected ? '(ОЖИД.)' : '';
+            html += `<div class="err-row" style="border-left-color:${color}">
+                <span class="t">[${fmtTime(e.t)}]</span>
+                <span class="ep" style="color:${color}">${e.endpoint}${e.op ? ' ('+e.op+')' : ''}</span>
+                → ${e.status || '—'} <b style="color:${color}">${label}</b>
+                <span class="msg" style="color:${color}">${e.msg || 'без описания'}</span>
+            </div>`;
+        }
+    } else html += '<div style="text-align:center;padding:10px;color:#627080;">Ошибок нет — всё чисто</div>';
+
+    html += `<button class="btn btn-warning btn-full" style="margin-top:12px;" onclick="copyStats()">📋 СКОПИРОВАТЬ ОТЧЁТ</button>`;
+    html += `<button class="btn btn-info btn-full" style="margin-top:4px;" onclick="resetStats()">🔄 СБРОСИТЬ СТАТИСТИКУ</button>`;
+    html += '</div>';
+
+    const modal = document.createElement("div"); modal.className = "col-modal-bg"; modal.innerHTML = html; document.body.appendChild(modal);
+}
+
+function copyStats() {
+    const txt = buildStatsReport();
+    navigator.clipboard.writeText(txt).then(() => alert("Статистика скопирована!")).catch(() => alert("Не удалось скопировать. Вот текст:\n\n" + txt));
+}
+
+function resetStats() {
+    if (!confirm("Сбросить всю статистику запросов?")) return;
+    statsData = { total:0, errors:0, expectedErrors:0, pings:[], sessionStart: Date.now(), endpoints:{}, perMinute:{}, perHour:{}, recentErrors:[] };
+    updateAdminStats(); log("📊 Статистика сброшена", "info");
+    document.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); showStats();
+}
+
+setInterval(updateAdminStats, 5000);
 </script>
 </body>
 </html>
