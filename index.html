@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ESCAPE TERMINAL v32</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg-color:#0d0d0d;--panel-bg:#151515;--border-color:#333;--text-main:#c4c4c4;--text-muted:#6e6e6e;
+--accent-green:#4b6a48;--accent-red:#8b2222;--accent-yellow:#b8860b;--accent-blue:#3d5c6b}
+*{box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent}
+body{background:#0d0d0d;background-image:repeating-linear-gradient(45deg,#111 0,#111 2px,transparent 2px,transparent 8px),linear-gradient(#000,#000);
+color:var(--text-main);font-family:'VT323',monospace;font-size:18px;margin:0;padding:15px;display:flex;justify-content:center;min-height:100vh}
+.container{width:100%;max-width:600px;display:flex;flex-direction:column;}
+.metal-panel{background:var(--panel-bg);border:2px solid var(--border-color);border-radius:4px;padding:15px;margin-bottom:15px;
+box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relative}
+.metal-panel::after{content:'';position:absolute;top:2px;left:2px;right:2px;bottom:2px;border:1px solid rgba(255,255,255,.03);pointer-events:none;border-radius:2px}
+#auth-screen{display:flex;flex-direction:column;gap:15px;margin-top:10vh;}
+#auth-screen h1{text-align:center;color:var(--accent-yellow);text-transform:uppercase;letter-spacing:2px;margin:0 0 10px;border-bottom:2px dashed var(--border-color);padding-bottom:10px;font-size:24px;}
+.input-group label{display:block;color:var(--text-muted);text-transform:uppercase;font-size:16px;margin-bottom:4px}
+.input-group input{width:100%;background:#050505;border:1px solid #444;color:var(--accent-green);padding:12px;font-family:'VT323',monospace;font-size:20px;outline:none;border-radius:4px;transition:0.2s;}
+.input-group input:focus{border-color:var(--accent-green);box-shadow:0 0 8px rgba(75,106,72,0.6);}
+.btn{font-family:'VT323',monospace;font-size:20px;text-transform:uppercase;padding:12px 15px;cursor:pointer;border:2px solid #000;border-radius:4px;transition:0.1s;text-align:center;color:#eee;display:flex;justify-content:center;align-items:center;gap:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 3px 0 #000;}
+.btn:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0px 0 #000;}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(1);transform:none;box-shadow:none;}
+.btn-primary{background:var(--accent-green)}.btn-danger{background:var(--accent-red)}.btn-warning{background:var(--accent-yellow);color:#000}.btn-info{background:var(--accent-blue)}
+.btn.active-goal { border: 3px solid var(--accent-yellow); box-shadow: inset 0 0 15px rgba(184,134,11,0.8), 0 3px 0 #000; background: #5a4a00; color: #fff; }
+.btn-full{width:100%;margin-bottom:10px}
+.btn-row{display:flex;gap:10px;margin-bottom:10px}.btn-row .btn{flex:1}
+.btn.sm{font-size:16px;padding:8px 4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 2px 0 #000;}
+.btn.sm:active{transform:translateY(2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 0px 0 #000;}
+.panel-title{background:#0a0a0a;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;padding:6px 10px;border-bottom:2px solid var(--border-color);margin:-15px -15px 15px -15px;font-size:16px;display:flex;justify-content:space-between;align-items:center;border-radius:2px 2px 0 0;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-box{background:#0a0a0a;border:1px solid var(--border-color);padding:10px;text-align:center;border-radius:4px;}
+.stat-label{font-size:14px;color:var(--text-muted);text-transform:uppercase}
+.stat-val{font-size:28px;color:#fff;line-height:1;margin-top:6px;text-shadow:0 0 5px rgba(255,255,255,0.3);}
+.stat-box.highlight .stat-val{color:var(--accent-yellow);text-shadow:0 0 8px rgba(184,134,11,0.5);}
+.stat-box.run .stat-val{color:var(--accent-green);text-shadow:0 0 8px rgba(75,106,72,0.5);}
+.stat-box.boss .stat-val{color:var(--accent-red);text-shadow:0 0 8px rgba(139,34,34,0.5);}
+.progress-container{background:#000;border:1px solid var(--border-color);height:24px;margin-bottom:15px;position:relative;display:none;border-radius:4px;overflow:hidden;}
+.progress-bar{background:linear-gradient(90deg,var(--accent-green),var(--accent-yellow));height:100%;width:0%;transition:width .3s}
+.progress-text{position:absolute;inset:0;text-align:center;color:#fff;font-size:16px;line-height:22px;text-shadow:1px 1px 0 #000,0 0 3px #000;font-weight:bold}
+.batch-input{display:flex;align-items:center;gap:10px;background:#0a0a0a;padding:8px;border:1px solid var(--border-color);margin-bottom:15px;border-radius:4px;}
+.batch-input input{width:70px;background:#111;border:1px solid #333;color:var(--accent-yellow);font-family:'VT323',monospace;font-size:22px;text-align:center;padding:8px;outline:none;border-radius:4px;}
+.loot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.loot-item{background:#111;border:1px solid #222;padding:8px 4px;text-align:center;font-size:14px;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;}
+.loot-item b{font-size:18px;color:#fff;margin-top:4px;font-weight:normal;}
+#log-box{background:#000;border:2px solid #222;padding:10px;height:180px;overflow-y:auto;font-size:15px;line-height:1.3;color:#4af626;box-shadow:inset 0 0 20px rgba(74,246,38,.1);border-radius:4px;}
+#log-box::-webkit-scrollbar{width:6px}#log-box::-webkit-scrollbar-thumb{background:#333;border-radius:3px;}
+.log-time{color:#2e8b57;margin-right:5px}.log-error{color:#ff4444}.log-warn{color:#ffbb33}.log-success{color:#4af626}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:14px;letter-spacing:1px;font-weight:bold;}
+.status-run{background:var(--accent-green);color:#fff;box-shadow:0 0 8px var(--accent-green);}
+.status-pause{background:var(--accent-yellow);color:#000;box-shadow:0 0 8px var(--accent-yellow);}
+.status-stop{background:var(--accent-red);color:#fff;box-shadow:0 0 8px var(--accent-red);}
+
+.session-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; background: #111; padding: 10px; border: 1px solid #333; border-radius: 4px; }
+.sess-item { font-size: 14px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+.sess-item b { color: var(--accent-green); font-size: 18px; margin-left: auto; text-shadow: 0 0 5px rgba(75,106,72,0.5); }
+
+.nickname-row { display: flex; justify-content: space-between; align-items: center; background: #0a0a0a; padding: 10px; border-radius: 4px; border: 1px solid #333; margin-bottom: 10px; }
+.nickname-row span { font-size: 20px; color: #fff; }
+.btn-edit { background: none; border: none; color: var(--accent-yellow); cursor: pointer; font-size: 18px; padding: 0 5px; }
+
+/* Модалка */
+.col-modal-bg { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px; }
+.col-modal-box { width:100%; max-width:450px; position:relative; max-height:85vh; overflow-y:auto; }
+.col-set { border:1px solid #333; padding:10px; margin-bottom:10px; background:#111; border-radius:4px; }
+.col-set b { color:#fff; font-size:18px; }
+.col-set span { font-size:14px; color:#aaa; display:block; margin:4px 0 8px; }
+.col-btn-row { display:flex; gap:5px; }
+
+.rating-row { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-bottom:1px solid #222; font-size:16px; }
+.rating-row.me { background: rgba(184,134,11,0.2); border-left:3px solid var(--accent-yellow); font-weight:bold; }
+.rating-place { width:30px; color:var(--text-muted); font-weight:bold; }
+.rating-name { flex:1; color:#fff; padding-left:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rating-val { font-weight:bold; color:var(--accent-yellow); padding-left:10px; }
+
+@media (max-width: 480px) {
+    body { padding: 10px; }
+    .metal-panel { padding: 12px; margin-bottom: 12px; }
+    .panel-title { margin: -12px -12px 12px -12px; padding: 4px 8px; font-size: 15px; }
+    .btn { font-size: 18px; padding: 10px; }
+    .btn.sm { font-size: 14px; padding: 6px 2px; }
+    .stat-val { font-size: 22px; }
+    .stat-label { font-size: 12px; }
+    .loot-item { font-size: 12px; padding: 6px 2px; }
+    .loot-item b { font-size: 16px; }
+    .btn-row { gap: 6px; margin-bottom: 6px; }
+    .batch-input { padding: 6px; gap: 6px; }
+    .batch-input input { width: 55px; font-size: 18px; padding: 6px; }
+    .batch-input .btn-warning { font-size: 16px; }
+    .stats-grid { gap: 6px; }
+    .stat-box { padding: 8px 4px; }
+    #auth-screen h1 { font-size: 20px; }
+    .session-stats { grid-template-columns: 1fr; }
+    .loot-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    .loot-grid { grid-template-columns: repeat(6, 1fr); }
+    .session-stats { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div id="auth-screen" class="metal-panel">
+  <h1>ДОСТУП К ТЕРМИНАЛУ</h1>
+  <div class="input-group"><label>Токен авторизации</label><input type="password" id="in-token" placeholder="eyJhbGci..."></div>
+  <div class="input-group"><label>ID Устройства</label><input type="password" id="in-device" placeholder="d1692..."></div>
+  <button class="btn btn-primary btn-full" onclick="login()">Подключиться</button>
+</div>
+
+<div id="main-screen" style="display:none;">
+  
+  <div class="metal-panel">
+    <div class="nickname-row">
+      <span id="ui-nickname">Загрузка...</span>
+      <button class="btn-edit" onclick="changeNickname()">✏️</button>
+    </div>
+    <div class="stats-grid" style="margin-bottom:10px;">
+      <div class="stat-box"><div class="stat-label">Мой Рекорд (КМ)</div><div class="stat-val" id="ui-best-km">0</div></div>
+      <div class="stat-box"><div class="stat-label">Моя Уважуха</div><div class="stat-val" id="ui-uvazh">0</div></div>
+    </div>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title"><span>ОПЕРАТИВНАЯ СВОДКА</span><span id="ui-status" class="status-badge status-stop">ОСТАНОВЛЕН</span></div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">Забеги (день)</div><div class="stat-val" id="ui-runs">0/50</div></div>
+      <div class="stat-box run"><div class="stat-label">Текущий км</div><div class="stat-val" id="ui-cur-km">0</div></div>
+      <div class="stat-box boss"><div class="stat-label">Урон Боссу</div><div class="stat-val" id="ui-boss-dmg">0</div></div>
+      <div class="stat-box"><div class="stat-label">Всего забегов</div><div class="stat-val" id="ui-total-runs">0</div></div>
+    </div>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title">РЕСУРСЫ</div>
+    <div class="loot-grid">
+      <div class="loot-item"><span style="color:#b8860b">Заначки</span><b id="res-zanachki">0</b></div>
+      <div class="loot-item"><span style="color:#e0e6ed">Бутеры</span><b id="res-buter">0</b></div>
+      <div class="loot-item"><span style="color:#ff5555">Колёса</span><b id="res-pills">0</b></div>
+      <div class="loot-item"><span style="color:#f0e68c">Масло</span><b id="res-soap">0</b></div>
+      <div class="loot-item"><span style="color:#c9b98f">Сигареты</span><b id="res-papirosy">0</b></div>
+      <div class="loot-item"><span style="color:#d4b04a">Песок</span><b id="res-sugar">0</b></div>
+      <div class="loot-item"><span style="color:#88ccff">Тайники</span><b id="res-tainiki">0</b></div>
+      <div class="loot-item"><span style="color:#cc88ff">Блат</span><b id="res-blat">0</b></div>
+      <div class="loot-item"><span style="color:#88ff88">Червонцы</span><b id="res-chervontsy">0</b></div>
+    </div>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title">ИГРОВАЯ ЛОГИКА (БОТ)</div>
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <button id="btn-goal-km_mid" class="btn btn-info sm" onclick="setGoal('km_mid')">Умный</button>
+      <button id="btn-goal-km_all" class="btn btn-info sm" onclick="setGoal('km_all')">Агрессивный</button>
+    </div>
+    <div class="btn-row" style="flex-wrap:wrap;">
+      <button id="btn-goal-km_safe" class="btn btn-info sm" onclick="setGoal('km_safe')">Экономный</button>
+      <button id="btn-goal-loot" class="btn btn-info sm" onclick="setGoal('loot')">Схроны (лут)</button>
+    </div>
+    <div style="font-size:14px;color:var(--text-muted);text-align:center;margin-top:10px; border-top:1px dashed #333; padding-top:8px;">
+      Текущая тактика: <span id="ui-goal" style="color:var(--accent-yellow);font-weight:bold;text-transform:uppercase;">—</span>
+    </div>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title">УПРАВЛЕНИЕ ЗАБЕГАМИ</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="startBatch(0, true)">БЕГ ДО ЛИМИТА</button>
+    </div>
+    <div class="batch-input">
+      <label style="color:var(--text-muted);font-size:16px;">ЗАБЕГОВ:</label>
+      <input type="number" id="in-batch" value="5" min="1" max="55">
+      <button class="btn btn-warning" style="flex:1;" onclick="startBatch(parseInt($('in-batch').value), false)">НАЧАТЬ БЕГ</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-info sm" onclick="setBatch(1)">×1</button>
+      <button class="btn btn-info sm" onclick="setBatch(5)">×5</button>
+      <button class="btn btn-info sm" onclick="setBatch(10)">×10</button>
+      <button class="btn btn-info sm" onclick="setBatch(15)">×15</button>
+    </div>
+    <div class="progress-container" id="batch-progress-cont">
+      <div class="progress-bar" id="batch-progress-bar"></div>
+      <div class="progress-text" id="batch-progress-text">0 / 0</div>
+    </div>
+    <div class="btn-row">
+      <button id="btn-pause" class="btn btn-warning" style="display:none;" onclick="pauseRun()">ПАУЗА</button>
+      <button id="btn-resume" class="btn btn-primary" style="display:none;" onclick="resumeRun()">ПРОДОЛЖИТЬ</button>
+      <button id="btn-cancel" class="btn btn-danger" style="display:none;" onclick="cancelBatch()">ОТМЕНА</button>
+    </div>
+    <button class="btn btn-warning btn-full" onclick="resetRun()">🔄 СБРОС ЗАБЕГА (СДАТЬСЯ)</button>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title">ПОМОЩЬ И КОЛЛЕКЦИИ</div>
+    <button id="btn-autohold" class="btn btn-info btn-full" onclick="toggleAutoHelp()">🤝 ВКЛЮЧИТЬ АВТО-ПОМОЩЬ</button>
+    <div id="help-info" style="font-size:14px;color:var(--text-muted);text-align:center;margin-bottom:10px;">Выключено</div>
+    
+    <button class="btn btn-warning btn-full" onclick="openCollections()">🎒 СДАТЬ КОЛЛЕКЦИИ (ЛУТ)</button>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title">СМОТРИТЕЛЬ</div>
+    <div id="boss-info" style="font-size:15px;margin-bottom:12px;color:var(--text-muted);text-align:center;background:#0a0a0a;padding:8px;border-radius:4px;border:1px solid #222;">— Ожидание данных —</div>
+    <div class="btn-row">
+      <button id="btn-boss-hit" class="btn btn-danger" onclick="startBoss()">ТЫКАТЬ БОССА</button>
+      <button id="btn-boss-stop" class="btn btn-warning" style="display:none;" onclick="stopBoss()">СТОП</button>
+    </div>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title">ИНСТРУМЕНТЫ</div>
+    <div class="btn-row">
+      <button class="btn btn-info" onclick="collectAll()">СОБРАТЬ ДОРОГУ</button>
+      <button class="btn btn-info" onclick="showRating()">🏆 ТОП СЕРВЕРА</button>
+    </div>
+    <button class="btn btn-danger btn-full" onclick="logout()" style="margin-top:5px;">🚪 ВЫЙТИ ИЗ АККАУНТА</button>
+  </div>
+
+  <div class="metal-panel">
+    <div class="panel-title">СТАТИСТИКА СЕССИИ (БОТА)</div>
+    <div class="session-stats">
+      <div class="sess-item">🏃 Пробежал: <b id="sess-runs">0</b> забегов</div>
+      <div class="sess-item">📏 Всего км: <b id="sess-km">0</b> км</div>
+      <div class="sess-item">🤝 Помощь: <b id="sess-help">0</b> раз</div>
+      <div class="sess-item">👊 Боссу: <b id="sess-boss">0</b> урона</div>
+    </div>
+  </div>
+
+  <div class="metal-panel" style="padding:5px;">
+    <div id="log-box">&gt; Терминал инициализирован...<br></div>
+  </div>
+</div>
+</div>
+
+<script>
+const BASE_URL = "https://boss-manager.ru/api";
+const $ = id => document.getElementById(id);
+
+let token = "", device = "";
+let isRunning = false, isPaused = false;
+let isBossHitting = false, isCollecting = false, isResetting = false;
+let cooldownUntil = 0, backoffMs = 0;
+let batchTarget = 0, batchDone = 0;
+let runToLimit = false;
+let lastKmInRun = 0;
+let lastState = null, lastStateTime = 0;
+let autoHelpEnabled = false;
+let pendingGoal = null;
+
+let session = { runs: 0, km: 0, help: 0, bossDmg: 0 };
+
+const SETS_INFO = {
+    hishnik: { name: "Хищник", pieces: 5 },
+    trotil: { name: "Детонатор", pieces: 5 },
+    lom: { name: "Кувалда", pieces: 5 },
+    grom: { name: "Грянул гром", pieces: 5 },
+    dolgiy: { name: "Долгий день", pieces: 5 },
+    nibelungi: { name: "Нибелунги", pieces: 5 },
+    koresha: { name: "Кореша", pieces: 5 },
+    podelniki: { name: "Подельники", pieces: 5 }
+};
+
+function plural(n, titles) {
+  const cases = [2, 0, 1, 1, 1, 2];
+  return titles[(n % 100 > 4 && n % 100 < 20) ? 2 : cases[(n % 10 < 5) ? n % 10 : 5]];
+}
+
+function updateSessionUI() {
+  $("sess-runs").innerText = session.runs;
+  $("sess-km").innerText = session.km.toLocaleString();
+  $("sess-help").innerText = session.help;
+  $("sess-boss").innerText = session.bossDmg.toLocaleString();
+}
+
+function log(msg, type = "info") {
+  const box = $("log-box"); if (!box) return;
+  const el = document.createElement("div");
+  const cls = type === "error" ? "log-error" : type === "warn" ? "log-warn" : type === "success" ? "log-success" : "";
+  const t = new Date().toLocaleTimeString('ru-RU', { hour12: false });
+  el.innerHTML = `<span class="log-time">[${t}]</span> <span class="${cls}">${msg}</span>`;
+  box.appendChild(el); box.scrollTop = box.scrollHeight;
+  if (box.children.length > 80) box.firstChild.remove();
+}
+
+async function getAuthHeaders() {
+  return { "Content-Type": "application/json", "X-Esc-Device": device, "Authorization": "Bearer " + token };
+}
+
+async function act(op, params = {}) {
+  try {
+    const res = await fetch(`${BASE_URL}/escape/act`, {
+      method: "POST", headers: await getAuthHeaders(), body: JSON.stringify({ action: { op, ...params } })
+    });
+    if (res.status === 401) { logout(); return { ok: false, error: "401" }; }
+    if (res.status === 429) {
+      backoffMs = Math.min(backoffMs + 300, 4000);
+      cooldownUntil = Date.now() + backoffMs;
+      return { ok: false, error: "429" };
+    }
+    if (res.ok) backoffMs = 0;
+    const data = await res.json();
+    if (data && data.state) { 
+      lastState = data.state; 
+      lastStateTime = Date.now();
+      if (data.state.dayDmg > 0) session.bossDmg = data.state.dayDmg;
+    }
+    return data;
+  } catch (e) { return { ok: false, error: "Net" }; }
+}
+
+async function getState() {
+  try {
+    const res = await fetch(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() });
+    if (res.status === 401) { logout(); return null; }
+    if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
+    const j = await res.json();
+    if (j.state && j.state.dayDmg > 0) session.bossDmg = j.state.dayDmg;
+    return j.state;
+  } catch (e) { return null; }
+}
+
+async function apiGet(path) {
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, { headers: await getAuthHeaders() });
+    if (res.status === 401) { logout(); return null; }
+    if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+async function apiPost(path, body = {}) {
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: "POST", headers: await getAuthHeaders(), body: JSON.stringify(body)
+    });
+    if (res.status === 401) { logout(); return null; }
+    if (res.status === 429) { cooldownUntil = Date.now() + 2000; return null; }
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+function getNicknameFromToken(jwt) {
+  try {
+    const payload = JSON.parse(atob(jwt.split('.')[1]));
+    return payload.login || payload.username || payload.name || payload.sub || "Безымянный";
+  } catch (e) { return "Безымянный"; }
+}
+
+function login() {
+  token = $("in-token").value.trim();
+  device = $("in-device").value.trim();
+  if (!token || !device) return alert("Введи токен и ID устройства!");
+  
+  localStorage.setItem("bot_token", token);
+  localStorage.setItem("bot_device", device);
+  localStorage.removeItem("force_logout");
+  
+  $("ui-nickname").innerText = getNicknameFromToken(token);
+  $("auth-screen").style.display = "none";
+  $("main-screen").style.display = "block";
+  log("УСПЕШНЫЙ ВХОД. ДОБРО ПОЖАЛОВАТЬ.", "success");
+  startStateLoop();
+}
+
+function logout() { 
+  if (!confirm("Выйти из аккаунта?")) return;
+  localStorage.clear(); 
+  localStorage.setItem("force_logout", "true"); 
+  location.reload(); 
+}
+
+window.onload = () => {
+  const st = localStorage.getItem("bot_token");
+  const sd = localStorage.getItem("bot_device");
+  const forceLogout = localStorage.getItem("force_logout") === "true";
+  
+  if (st && sd && !forceLogout) {
+    $("in-token").value = st;
+    $("in-device").value = sd;
+    login();
+  }
+  updateSessionUI();
+};
+
+function getRes(key) {
+  const st = lastState;
+  if (!st) return 0;
+  if (key === 'blat') return st.blat || 0;
+  if (st.res && st.res[key] !== undefined) return st.res[key];
+  if (st.wallet && st.wallet[key] !== undefined) return st.wallet[key];
+  return 0;
+}
+
+async function setGoal(goal) {
+  if (lastState && lastState.run) {
+    pendingGoal = goal;
+    log("Тактика будет применена при следующем старте.", "warn");
+    updateUI();
+    return;
+  }
+  
+  const res = await act("autocfg", { k: "goal", v: goal });
+  if (res && res.ok) {
+    log("Тактика изменена на: " + goal, "success");
+    if(lastState && lastState.autoCfg) lastState.autoCfg.goal = goal;
+    updateUI();
+  } else {
+    log("Ошибка смены тактики: " + (res?.error || "неизвестная"), "error");
+  }
+}
+
+async function changeNickname() {
+  const newNick = prompt("Введите новый никнейм (3-15 символов):", $("ui-nickname").innerText);
+  if (!newNick || newNick.length < 3) return;
+  const res = await act("nickname", { name: newNick });
+  if (res && res.ok) {
+    log("Никнейм успешно изменен!", "success");
+    $("ui-nickname").innerText = newNick;
+  } else {
+    log("Ошибка смены ника: " + (res?.error || "занято или нельзя"), "error");
+  }
+}
+
+// ===== ОБЩИЙ РЕЙТИНГ СЕРВЕРА =====
+async function showRating() {
+  log("Загрузка рейтинга сервера...", "info");
+  
+  // Запрашиваем оба топа
+  const [topKm, topUvazh] = await Promise.all([
+    apiGet("/escape/rating"),
+    apiGet("/escape/uvazh-rating")
+  ]);
+  
+  if (!topKm || !topUvazh) return log("Не удалось загрузить рейтинг", "error");
+
+  let html = '<div class="col-modal-box metal-panel">';
+  html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+  
+  // Топ по КМ
+  html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:10px;">🏆 ТОП ПО КИЛОМЕТРАМ</h2>';
+  if (topKm.players && topKm.players.length) {
+    topKm.players.slice(0, 10).forEach((p, i) => {
+      const isMe = p.login === getNicknameFromToken(token);
+      const place = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.';
+      html += `<div class="rating-row ${isMe?'me':''}">
+        <span class="rating-place">${place}</span>
+        <span class="rating-name">${p.display_name || p.login}</span>
+        <span class="rating-val">${p.record_km || 0} км</span>
+      </div>`;
+    });
+  } else {
+    html += '<div style="text-align:center;padding:10px;color:#777;">Нет данных</div>';
+  }
+
+  // Топ по Уважухе
+  html += '<h2 style="color:var(--accent-green);text-align:center;margin:20px 0 10px;">💚 ТОП ПО УВАЖУХЕ</h2>';
+  if (topUvazh.rows && topUvazh.rows.length) {
+    topUvazh.rows.slice(0, 10).forEach((p, i) => {
+      const isMe = p.name === getNicknameFromToken(token);
+      const place = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1)+'.';
+      html += `<div class="rating-row ${isMe?'me':''}">
+        <span class="rating-place">${place}</span>
+        <span class="rating-name">${p.name}</span>
+        <span class="rating-val" style="color:var(--accent-green)">${p.uvazh || 0} ув.</span>
+      </div>`;
+    });
+  } else {
+    html += '<div style="text-align:center;padding:10px;color:#777;">Нет данных</div>';
+  }
+
+  html += '</div>';
+  const modal = document.createElement("div");
+  modal.className = "col-modal-bg";
+  modal.innerHTML = html;
+  document.body.appendChild(modal);
+}
+
+function openCollections() {
+  if (!lastState || !lastState.items) return log("Нет данных об инвентаре", "error");
+  
+  let html = '<div class="col-modal-box metal-panel">';
+  html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+  html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:15px;">ТВОИ КОЛЛЕКЦИИ</h2>';
+  
+  let hasItems = false;
+  for (const [setId, info] of Object.entries(SETS_INFO)) {
+    let minCount = Infinity;
+    for (let i = 0; i < info.pieces; i++) {
+      const c = lastState.items[`${setId}:${i}`] || 0;
+      if (c < minCount) minCount = c;
+    }
+    if (minCount === Infinity) minCount = 0;
+    
+    let totalParts = 0;
+    for (let i = 0; i < info.pieces; i++) totalParts += (lastState.items[`${setId}:${i}`] || 0);
+
+    if (totalParts > 0) {
+      hasItems = true;
+      html += `<div class="col-set">
+        <b>${info.name}</b>
+        <span>Деталей: ${totalParts} | Готовых сетов: ${minCount}</span>
+        <div class="col-btn-row">`;
+      
+      if (minCount > 0) {
+        html += `<button class="btn btn-info sm" onclick="sellSet('${setId}', 1)">Сдать 1</button>`;
+        if (minCount > 1) html += `<button class="btn btn-warning sm" onclick="sellSet('${setId}', ${minCount})">Сдать все (${minCount})</button>`;
+      } else {
+        html += `<span style="color:#777; font-size:14px;">Нужно собрать все 5 деталей</span>`;
+      }
+      
+      html += `</div></div>`;
+    }
+  }
+  
+  if (!hasItems) html += '<div style="text-align:center;padding:20px;color:#777;">У тебя нет деталей коллекций.</div>';
+  html += '</div>';
+
+  const modal = document.createElement("div");
+  modal.className = "col-modal-bg";
+  modal.innerHTML = html;
+  document.body.appendChild(modal);
+}
+
+async function sellSet(setId, count) {
+  const res = await act("sellset", { k: setId, n: count });
+  if (res && res.ok) {
+    log(`Успешно сдано: ${setId} x${count}`, "success");
+    document.body.querySelectorAll('.col-modal-bg').forEach(el => el.remove());
+    setTimeout(openCollections, 100);
+  } else {
+    log("Ошибка сдачи: " + (res?.error || "?"), "error");
+  }
+}
+
+function toggleAutoHelp() {
+  autoHelpEnabled = !autoHelpEnabled;
+  const btn = $("btn-autohold");
+  const info = $("help-info");
+  if (autoHelpEnabled) {
+    btn.innerText = "🛑 ВЫКЛЮЧИТЬ АВТО-ПОМОЩЬ";
+    btn.className = "btn btn-danger btn-full";
+    info.innerText = "Включено. Бот будет помогать при любом удобном случае.";
+    info.style.color = "var(--accent-green)";
+  } else {
+    btn.innerText = "🤝 ВКЛЮЧИТЬ АВТО-ПОМОЩЬ";
+    btn.className = "btn btn-info btn-full";
+    info.innerText = "Выключено";
+    info.style.color = "var(--text-muted)";
+  }
+}
+
+function updateUI() {
+  const st = lastState;
+  if (!st) return;
+
+  $("ui-best-km").innerText = st.record || 0;
+  $("ui-uvazh").innerText = st.stats?.uvazh || st.uvazh || 0;
+  
+  const attempts = st.daily?.attempts || 0;
+  const maxRuns = 50 + (st.daily?.extra || 0);
+  $("ui-runs").innerText = `${attempts}/${maxRuns}`;
+  $("ui-cur-km").innerText = st.run ? st.run.km : 0;
+  $("ui-boss-dmg").innerText = (st.dayDmg || 0).toLocaleString();
+  $("ui-total-runs").innerText = (st.stats?.runs || 0).toLocaleString();
+
+  let currentGoal = st.autoCfg?.goal || "km_mid";
+  if (pendingGoal) currentGoal = pendingGoal;
+  
+  const goalMap = { 'km_all':'Агрессивный','km_mid':'Умный','km_safe':'Экономный','nospend':'Без трат','loot':'Схроны','krest':'Могильщик','alive':'Живыми' };
+  $("ui-goal").innerText = goalMap[currentGoal] || currentGoal;
+
+  ["km_mid","km_all","km_safe","loot"].forEach(g => {
+    const b = $("btn-goal-" + g);
+    if (b) b.classList.toggle("active-goal", currentGoal === g);
+  });
+
+  ["zanachki","buter","pills","soap","papirosy","sugar","tainiki","blat","chervontsy"].forEach(k => {
+    const el = $("res-" + k);
+    if (el) el.innerText = getRes(k).toLocaleString();
+  });
+
+  const badge = $("ui-status");
+  if (isRunning && isPaused) {
+    badge.className = "status-badge status-pause";
+    badge.innerText = "ПАУЗА";
+  } else if (isRunning) {
+    badge.className = "status-badge status-run";
+    badge.innerText = runToLimit ? "В ПУТИ" : `БАТЧ ${batchDone}/${batchTarget}`;
+  } else {
+    badge.className = "status-badge status-stop";
+    badge.innerText = "ОСТАНОВЛЕН";
+  }
+
+  $("btn-pause").style.display  = (isRunning && !isPaused) ? "block" : "none";
+  $("btn-resume").style.display = (isRunning &&  isPaused) ? "block" : "none";
+  $("btn-cancel").style.display = isRunning ? "block" : "none";
+
+  if (isRunning || batchDone > 0) {
+    $("batch-progress-cont").style.display = "block";
+    if (runToLimit) {
+      const pct = Math.min(100, (attempts / maxRuns) * 100);
+      $("batch-progress-bar").style.width = pct + "%";
+      $("batch-progress-text").innerText = `ДЕНЬ: ${attempts} / ${maxRuns}`;
+    } else if (batchTarget > 0) {
+      const pct = Math.min(100, (batchDone / batchTarget) * 100);
+      $("batch-progress-bar").style.width = pct + "%";
+      $("batch-progress-text").innerText = `БАТЧ: ${batchDone} / ${batchTarget}`;
+    }
+  } else {
+    $("batch-progress-cont").style.display = "none";
+  }
+  
+  updateSessionUI();
+}
+
+async function startStateLoop() {
+  while (true) {
+    const state = await getState();
+    if (state) { lastState = state; lastStateTime = Date.now(); updateUI(); }
+    if (!isBossHitting) refreshBossInfo();
+    
+    if (autoHelpEnabled && state && state.run) {
+      await triggerAutoHelp();
+    }
+    
+    await new Promise(r => setTimeout(r, 3000));
+  }
+}
+
+function setBatch(n) { $("in-batch").value = n; }
+
+async function startBatch(n, isLimit) {
+  if (isRunning) { alert("Уже запущено! Сначала останови текущий."); return; }
+  
+  if (!isLimit) {
+    if (isNaN(n) || n <= 0) return alert("Введи нормальное число забегов!");
+    const word = plural(n, ['забег', 'забега', 'забегов']);
+    if (!confirm(`Начать бежать ровно ${n} ${word}?`)) return;
+  } else {
+    if (!confirm(`Начать бежать до дневного лимита?`)) return;
+  }
+
+  if (pendingGoal) {
+    log("Применяю отложенную тактику: " + pendingGoal, "warn");
+    await setGoal(pendingGoal);
+    pendingGoal = null;
+  }
+
+  runToLimit = isLimit;
+  batchTarget = isLimit ? 0 : n; 
+  batchDone = 0;
+  
+  log(runToLimit ? `▶ Запуск: БЕГ ДО ЛИМИТА` : `▶ Запуск: ${n} ${plural(n, ['забег', 'забега', 'забегов'])}`, "warn");
+  isRunning = true; isPaused = false;
+  updateUI();
+  runLoop();
+}
+
+function pauseRun() {
+  if (!isRunning || isPaused) return;
+  isPaused = true;
+  log("⏸ ПАУЗА", "warn");
+  updateUI();
+}
+
+function resumeRun() {
+  if (!isRunning || !isPaused) return;
+  isPaused = false;
+  log("▶ ПРОДОЛЖАЕМ", "success");
+  updateUI();
+  runLoop();
+}
+
+function cancelBatch() {
+  if (!confirm("Точно остановить забеги? Текущий забег останется висеть.")) return;
+  isRunning = false; isPaused = false;
+  batchTarget = 0; batchDone = 0; runToLimit = false;
+  updateUI();
+  log("✕ ЗАБЕГИ ОСТАНОВЛЕНЫ", "warn");
+}
+
+async function resetRun() {
+  if (isResetting) return;
+  if (!confirm("⚠️ ВНИМАНИЕ! Бот сдастся (потеряет текущий км) и начнет заново. Уверен?")) return;
+  
+  isResetting = true;
+  const wasRunning = isRunning;
+  isRunning = false; isPaused = false;
+  updateUI();
+  log("🔄 СБРОС ЗАБЕГА...", "warn");
+  
+  try {
+    await act("surrender");
+    await new Promise(r => setTimeout(r, 200));
+    await act("caughtok");
+    await new Promise(r => setTimeout(r, 200));
+    lastKmInRun = 0;
+    batchDone = 0;
+    lastState = null; lastStateTime = 0;
+    const st = await getState();
+    if (st) { lastState = st; lastStateTime = Date.now(); }
+    updateUI();
+    log("✓ Забег сброшен", "success");
+  } catch (e) { log("Ошибка сброса: " + e.message, "error"); }
+  
+  isResetting = false;
+  if (wasRunning) { isRunning = true; isPaused = false; runLoop(); }
+}
+
+async function triggerAutoHelp() {
+  try {
+    const convoy = await apiGet("/escape/convoy");
+    if (!convoy || !convoy.mates || !convoy.mates.length) return;
+    
+    for (const mate of convoy.mates) {
+      if (mate.owed) continue;
+      
+      const gifts = ["trail", "buter", "pills", "cover"];
+      for (const g of gifts) {
+        const r = await apiPost("/escape/convoy/give", { to: mate.id, kind: g });
+        if (r && r.success) {
+           session.help++;
+           updateSessionUI();
+           log(`Помог: ${mate.name} (${g})`, "success");
+           await new Promise(res => setTimeout(res, 300));
+           break;
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+async function runLoop() {
+  if (!isRunning || isPaused || isResetting) return;
+
+  let st = lastState;
+  if (!st || Date.now() - lastStateTime > 2000) {
+    st = await getState();
+    if (!st) { setTimeout(runLoop, 800); return; }
+    lastState = st; lastStateTime = Date.now();
+    updateUI();
+  }
+
+  const maxRuns = 50 + (st.daily?.extra || 0);
+  const attempts = st.daily?.attempts || 0;
+
+  if (runToLimit && attempts >= maxRuns) {
+    log(`✅ ДОСТИГНУТ ДНЕВНОЙ ЛИМИТ (${attempts}/${maxRuns})`, "success");
+    isRunning = false; runToLimit = false; updateUI(); return;
+  }
+  if (!runToLimit && batchDone >= batchTarget) {
+    log(`✅ БАТЧ ЗАВЕРШЁН (${batchDone}/${batchTarget})`, "success");
+    isRunning = false; batchTarget = 0; updateUI(); return;
+  }
+
+  if (Date.now() < cooldownUntil) {
+    setTimeout(runLoop, Math.max(30, cooldownUntil - Date.now() + 30));
+    return;
+  }
+
+  const run = st.run;
+
+  if (!run) {
+    if (pendingGoal) {
+      log("Применяю отложенную тактику: " + pendingGoal, "warn");
+      await setGoal(pendingGoal);
+      pendingGoal = null;
+    }
+
+    const res = await act("start");
+    if (res.ok) {
+      log("▶ Забег начат", "success");
+      await act("auto", { on: true });
+    } else if (res.error !== "429" && res.error !== "Net") {
+      if (attempts >= maxRuns) {
+        log("🚫 ЛИМИТ ЗАБЕГОВ", "error");
+        isRunning = false; runToLimit = false; updateUI(); return;
+      }
+      log("Старт: " + (res.error || "неизвестная ошибка"), "error");
+      await new Promise(r => setTimeout(r, 500));
+    }
+    setTimeout(runLoop, 30);
+    return;
+  }
+
+  if (!run.auto) {
+    await act("auto", { on: true });
+    setTimeout(runLoop, 20);
+    return;
+  }
+
+  if (run.km > lastKmInRun) {
+    const diff = run.km - lastKmInRun;
+    session.km += diff;
+    updateSessionUI();
+    lastKmInRun = run.km;
+    const el = $("ui-cur-km"); if (el) el.innerText = run.km;
+  }
+
+  const phase = run.phase;
+
+  if (phase === "battle") {
+    await act("auto_burst", { n: 50, _fast: true, collapse: true });
+  } else if (phase === "victory") {
+    await act("victoryok");
+  } else if (phase === "caught") {
+    await act("caughtok");
+    batchDone++;
+    session.runs++;
+    updateSessionUI();
+    lastKmInRun = 0;
+    if ($("ui-cur-km")) $("ui-cur-km").innerText = 0;
+    updateUI();
+  } else if (phase === "event") {
+    await act("auto_step");
+  } else if (phase === "road") {
+    await act("auto_step");
+  }
+
+  if (isRunning) setTimeout(runLoop, 0);
+}
+
+async function refreshBossInfo() {
+  const data = await apiGet("/escape/daily-boss");
+  if (!data || !$("boss-info")) return null;
+  const hp = data.hp || 0, maxHp = data.max_hp || 1;
+  const taps = data.me?.taps_left || 0;
+  const power = data.me?.tap_power || 1;
+  const dmg = data.me?.damage || 0;
+  const dayKm = data.me?.day_km || 0;
+
+  if (data.killed) {
+    $("boss-info").innerHTML = `💀 <b style="color:var(--accent-red)">ПОВЕРЖЕН</b> · урон: <b>${dmg.toLocaleString()}</b>`;
+  } else {
+    $("boss-info").innerHTML = `HP: <b>${hp.toLocaleString()}</b> / ${maxHp.toLocaleString()}<br>` +
+      `тыки: <b style="color:var(--accent-yellow)">${taps}</b> (${dayKm} км) · сила ×${power}`;
+  }
+  $("ui-boss-dmg").innerText = dmg.toLocaleString();
+  return data;
+}
+
+function startBoss() {
+  if (!confirm("Начать тыкать Смотрителя? Будут потрачены все доступные тыки.")) return;
+  isBossHitting = true;
+  $("btn-boss-hit").style.display = "none";
+  $("btn-boss-stop").style.display = "block";
+  bossLoop();
+}
+
+function stopBoss() {
+  isBossHitting = false;
+  $("btn-boss-hit").style.display = "block";
+  $("btn-boss-stop").style.display = "none";
+}
+
+async function bossLoop() {
+  if (!isBossHitting) return;
+  const data = await refreshBossInfo();
+  if (!data) { setTimeout(bossLoop, 2000); return; }
+  if (data.killed) { log("✅ СМОТРИТЕЛЬ МЕРТВ", "success"); stopBoss(); return; }
+  
+  let tapsLeft = data.me?.taps_left || 0;
+  if (tapsLeft <= 0) { log("Нет тыков (беги км)", "warn"); stopBoss(); return; }
+
+  let delay = 40;
+
+  while (tapsLeft > 0 && isBossHitting) {
+    const batch = Math.min(500, tapsLeft);
+    const r = await apiPost("/escape/daily-boss/tap", { count: batch });
+    
+    if (!r) {
+      await new Promise(res => setTimeout(res, 1000));
+      continue;
+    }
+
+    if (r.error === "429" || (r.message && r.message.includes("429")) || r.error === "cooldown") {
+      delay = Math.min(delay + 100, 1000);
+      log("Сервер притормаживает...", "warn");
+      await new Promise(res => setTimeout(res, delay));
+      continue;
+    }
+
+    if (!r.success) { 
+      log("Тык: " + (r.error || "?"), "error"); 
+      break; 
+    }
+
+    delay = Math.max(20, delay - 10);
+
+    tapsLeft = r.me?.taps_left || 0;
+    const dmg = r.me?.damage || 0;
+    session.bossDmg = dmg;
+    updateSessionUI();
+    $("ui-boss-dmg").innerText = dmg.toLocaleString();
+    $("boss-info").innerHTML = `Тыки: <b style="color:var(--accent-yellow)">${tapsLeft}</b> · Урон: <b>${dmg.toLocaleString()}</b>`;
+    
+    if (r.killed) { 
+      log("✅ СМОТРИТЕЛЬ ПОВЕРЖЕН", "success"); 
+      stopBoss(); 
+      return; 
+    }
+    
+    await new Promise(res => setTimeout(res, delay));
+  }
+  stopBoss();
+}
+
+async function collectAll() {
+  if (isCollecting) return;
+  isCollecting = true;
+  log("🔄 СБОР НАГРАД...", "warn");
+  try {
+    const road = await apiGet("/escape/kmroad");
+    if (road && road.steps) {
+      let n = 0;
+      for (const s of road.steps) {
+        if (s.reached && !s.claimed) {
+          const r = await apiPost("/escape/kmroad/claim", { km: s.km });
+          if (r && r.success) n++;
+          await new Promise(res => setTimeout(res, 180));
+        }
+      }
+      if (n > 0) log(`🛤 Дорога: +${n} наград`, "success");
+    }
+    const inc = await apiGet("/escape/merc/income");
+    if (inc && inc.unseen > 0) {
+      await apiPost("/escape/merc/income", { seen: true });
+      log(`💰 Наёмники: новых ${inc.unseen}`, "success");
+    }
+    const st = await getState();
+    if (st) { lastState = st; lastStateTime = Date.now(); updateUI(); }
+    log("✅ СБОР ЗАВЕРШЁН", "success");
+  } catch (e) { log("Ошибка сбора: " + e.message, "error"); }
+  isCollecting = false;
+}
+
+async function showKmRoad() {
+  const road = await apiGet("/escape/kmroad");
+  if (!road || !road.steps) { log("Дорога недоступна", "error"); return; }
+  
+  let html = 'ДОРОГА ВОЛИ\n\n';
+  html += `Пройдено: ${road.record || 0} км\n\n`;
+  
+  road.steps.forEach(s => {
+    const status = s.claimed ? '✅' : s.reached ? '🎁' : '🔒';
+    html += `${status} ${s.km} км — ${s.name || ''}\n`;
+  });
+  
+  alert(html);
+}
+</script>
+</body>
+</html>
