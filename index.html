@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ESCAPE TERMINAL v40</title>
+<title>ESCAPE TERMINAL v41</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{--bg-color:#0d0d0d;--panel-bg:#151515;--border-color:#333;--text-main:#c4c4c4;--text-muted:#6e6e6e;
@@ -235,8 +235,6 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
 </div>
 
 <script>
-// --- ПРОКСИ ДЛЯ ОБХОДА CORS ---
-const PROXY_URL = "https://api.allorigins.win/raw?url=";
 const BASE_URL = "https://boss-manager.ru/api";
 const $ = id => document.getElementById(id);
 
@@ -293,9 +291,11 @@ async function getAuthHeaders() {
 
 // ОБЕРТКА ДЛЯ ЗАПРОСОВ ЧЕРЕЗ ПРОКСИ
 async function fetchProxy(url, options) {
-  const proxyUrl = PROXY_URL + encodeURIComponent(url);
+  // Используем альтернативный прокси CORS.is
+  const proxyUrl = "https://cors.is/?url=" + encodeURIComponent(url);
+  
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), 8000);
+  const id = setTimeout(() => controller.abort(), 10000);
   try {
     const res = await fetch(proxyUrl, { ...options, signal: controller.signal });
     clearTimeout(id);
