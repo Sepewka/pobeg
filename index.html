@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ESCAPE TERMINAL v37</title>
+<title>ESCAPE TERMINAL v39</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{--bg-color:#0d0d0d;--panel-bg:#151515;--border-color:#333;--text-main:#c4c4c4;--text-muted:#6e6e6e;
@@ -248,6 +248,7 @@ let lastKmInRun = 0;
 let lastState = null, lastStateTime = 0;
 let autoHelpEnabled = false;
 let pendingGoal = null;
+let isLoggingIn = false;
 
 let session = { runs: 0, km: 0, help: 0, bossDmg: 0 };
 
@@ -288,11 +289,9 @@ async function getAuthHeaders() {
   return { "Content-Type": "application/json", "X-Esc-Device": device, "Authorization": "Bearer " + token };
 }
 
-// ТАЙМАУТ НА ЗАПРОС
-const TIMEOUT = 5000;
-async function fetchWithTimeout(url, options) {
+async function fetchWithTimeout(url, options, timeout = 4000) {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), TIMEOUT);
+  const id = setTimeout(() => controller.abort(), timeout);
   try {
     const res = await fetch(url, { ...options, signal: controller.signal });
     clearTimeout(id);
@@ -329,8 +328,8 @@ async function act(op, params = {}) {
 async function getState() {
   try {
     const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() });
-    if (!res) { log("Таймаут запроса данных (сервер не отвечает)", "error"); return null; }
-    if (res.status === 401) { log("Ошибка 401: Токен неверный!", "error"); return null; }
+    if (!res) return null;
+    if (res.status === 401) return null;
     if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
     const j = await res.json();
     if (j.state && j.state.dayDmg > 0) session.bossDmg = j.state.dayDmg;
@@ -360,13 +359,6 @@ async function apiPost(path, body = {}) {
   } catch (e) { return null; }
 }
 
-function forceLogout(reason) {
-  alert(reason);
-  localStorage.clear(); 
-  localStorage.setItem("force_logout", "true"); 
-  location.reload(); 
-}
-
 function getNicknameFromToken(jwt) {
   try {
     const payload = JSON.parse(atob(jwt.split('.')[1]));
@@ -374,20 +366,58 @@ function getNicknameFromToken(jwt) {
   } catch (e) { return "Безымянный"; }
 }
 
-function login() {
+// ЖЕСТКАЯ ПРОВЕРКА ДАННЫХ ПРИ ВХОДЕ
+async function login() {
+  if (isLoggingIn) return;
   token = $("in-token").value.trim();
   device = $("in-device").value.trim();
   if (!token || !device) return alert("Введи токен и ID устройства!");
   
-  localStorage.setItem("bot_token", token);
-  localStorage.setItem("bot_device", device);
-  localStorage.removeItem("force_logout");
-  
-  $("ui-nickname").innerText = getNicknameFromToken(token);
-  $("auth-screen").style.display = "none";
-  $("main-screen").style.display = "block";
-  log("ПОДКЛЮЧЕНИЕ...", "success");
-  startStateLoop();
+  isLoggingIn = true;
+  const btn = document.querySelector('#auth-screen .btn-primary');
+  const oldText = btn.innerText;
+  btn.innerText = "ПРОВЕРКА...";
+  btn.disabled = true;
+
+  try {
+    // Пробуем получить стейт
+    const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { 
+      headers: { "Authorization": "Bearer " + token, "X-Esc-Device": device } 
+    }, 5000);
+
+    if (!res) throw new Error("Сервер игры не отвечает (таймаут).");
+    if (res.status === 401) throw new Error("Неверный токен или ID устройства.");
+    if (res.status === 403) throw new Error("Сервер заблокировал запрос (кулдаун).");
+    if (!res.ok) throw new Error("Ошибка сервера: " + res.status);
+
+    const j = await res.json();
+    if (!j.state) throw new Error("Сервер вернул пустой ответ.");
+
+    // Если дошли сюда — данные верные
+    localStorage.setItem("bot_token", token);
+    localStorage.setItem("bot_device", device);
+    localStorage.removeItem("force_logout");
+    
+    $("ui-nickname").innerText = getNicknameFromToken(token);
+    $("auth-screen").style.display = "none";
+    $("main-screen").style.display = "block";
+    log("УСПЕШНЫЙ ВХОД", "success");
+    
+    // Сразу применяем стейт, чтобы не ждать
+    lastState = j.state;
+    lastStateTime = Date.now();
+    updateUI();
+    
+    startStateLoop();
+  } catch (err) {
+    alert("ОШИБКА ВХОДА: " + err.message + "\n\nПроверь токен и ID.");
+    localStorage.removeItem("bot_token");
+    localStorage.removeItem("bot_device");
+  } finally {
+    isLoggingIn = false;
+    btn.innerText = oldText;
+    btn.disabled = false;
+  }
 }
 
 function logout() { 
@@ -398,11 +428,11 @@ function logout() {
 }
 
 window.onload = () => {
-  localStorage.removeItem("force_logout");
+  const forceLogout = localStorage.getItem("force_logout") === "true";
   const st = localStorage.getItem("bot_token");
   const sd = localStorage.getItem("bot_device");
   
-  if (st && sd) {
+  if (st && sd && !forceLogout) {
     $("in-token").value = st;
     $("in-device").value = sd;
     login();
