@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ESCAPE TERMINAL v41</title>
+<title>ESCAPE TERMINAL v39</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{--bg-color:#0d0d0d;--panel-bg:#151515;--border-color:#333;--text-main:#c4c4c4;--text-muted:#6e6e6e;
@@ -289,15 +289,11 @@ async function getAuthHeaders() {
   return { "Content-Type": "application/json", "X-Esc-Device": device, "Authorization": "Bearer " + token };
 }
 
-// ОБЕРТКА ДЛЯ ЗАПРОСОВ ЧЕРЕЗ ПРОКСИ
-async function fetchProxy(url, options) {
-  // Используем альтернативный прокси CORS.is
-  const proxyUrl = "https://cors.is/?url=" + encodeURIComponent(url);
-  
+async function fetchWithTimeout(url, options, timeout = 4000) {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), 10000);
+  const id = setTimeout(() => controller.abort(), timeout);
   try {
-    const res = await fetch(proxyUrl, { ...options, signal: controller.signal });
+    const res = await fetch(url, { ...options, signal: controller.signal });
     clearTimeout(id);
     return res;
   } catch (e) {
@@ -308,7 +304,7 @@ async function fetchProxy(url, options) {
 
 async function act(op, params = {}) {
   try {
-    const res = await fetchProxy(`${BASE_URL}/escape/act`, {
+    const res = await fetchWithTimeout(`${BASE_URL}/escape/act`, {
       method: "POST", headers: await getAuthHeaders(), body: JSON.stringify({ action: { op, ...params } })
     });
     if (!res) { log("Таймаут запроса (сервер не отвечает)", "error"); return { ok: false, error: "Timeout" }; }
@@ -331,7 +327,7 @@ async function act(op, params = {}) {
 
 async function getState() {
   try {
-    const res = await fetchProxy(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() });
+    const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() });
     if (!res) return null;
     if (res.status === 401) return null;
     if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
@@ -343,7 +339,7 @@ async function getState() {
 
 async function apiGet(path) {
   try {
-    const res = await fetchProxy(`${BASE_URL}${path}`, { headers: await getAuthHeaders() });
+    const res = await fetchWithTimeout(`${BASE_URL}${path}`, { headers: await getAuthHeaders() });
     if (!res) return null;
     if (res.status === 401) return null;
     if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
@@ -353,7 +349,7 @@ async function apiGet(path) {
 
 async function apiPost(path, body = {}) {
   try {
-    const res = await fetchProxy(`${BASE_URL}${path}`, {
+    const res = await fetchWithTimeout(`${BASE_URL}${path}`, {
       method: "POST", headers: await getAuthHeaders(), body: JSON.stringify(body)
     });
     if (!res) return null;
@@ -370,6 +366,7 @@ function getNicknameFromToken(jwt) {
   } catch (e) { return "Безымянный"; }
 }
 
+// ЖЕСТКАЯ ПРОВЕРКА ДАННЫХ ПРИ ВХОДЕ
 async function login() {
   if (isLoggingIn) return;
   token = $("in-token").value.trim();
@@ -383,19 +380,20 @@ async function login() {
   btn.disabled = true;
 
   try {
-    // Проверка через прокси
-    const res = await fetchProxy(`${BASE_URL}/escape/state`, { 
+    // Пробуем получить стейт
+    const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { 
       headers: { "Authorization": "Bearer " + token, "X-Esc-Device": device } 
-    });
+    }, 5000);
 
-    if (!res) throw new Error("Прокси не отвечает. Попробуй позже.");
-    if (res.status === 401) throw new Error("Неверный токен или ID.");
+    if (!res) throw new Error("Сервер игры не отвечает (таймаут).");
+    if (res.status === 401) throw new Error("Неверный токен или ID устройства.");
     if (res.status === 403) throw new Error("Сервер заблокировал запрос (кулдаун).");
     if (!res.ok) throw new Error("Ошибка сервера: " + res.status);
 
     const j = await res.json();
     if (!j.state) throw new Error("Сервер вернул пустой ответ.");
 
+    // Если дошли сюда — данные верные
     localStorage.setItem("bot_token", token);
     localStorage.setItem("bot_device", device);
     localStorage.removeItem("force_logout");
@@ -405,13 +403,14 @@ async function login() {
     $("main-screen").style.display = "block";
     log("УСПЕШНЫЙ ВХОД", "success");
     
+    // Сразу применяем стейт, чтобы не ждать
     lastState = j.state;
     lastStateTime = Date.now();
     updateUI();
     
     startStateLoop();
   } catch (err) {
-    alert("ОШИБКА ВХОДА: " + err.message);
+    alert("ОШИБКА ВХОДА: " + err.message + "\n\nПроверь токен и ID.");
     localStorage.removeItem("bot_token");
     localStorage.removeItem("bot_device");
   } finally {
