@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ESCAPE TERMINAL v32</title>
+<title>ESCAPE TERMINAL v35</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{--bg-color:#0d0d0d;--panel-bg:#151515;--border-color:#333;--text-main:#c4c4c4;--text-muted:#6e6e6e;
@@ -61,7 +61,6 @@ box-shadow:inset 0 0 10px rgba(0,0,0,.8),0 4px 6px rgba(0,0,0,.6);position:relat
 .nickname-row span { font-size: 20px; color: #fff; }
 .btn-edit { background: none; border: none; color: var(--accent-yellow); cursor: pointer; font-size: 18px; padding: 0 5px; }
 
-/* Модалка */
 .col-modal-bg { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px; }
 .col-modal-box { width:100%; max-width:450px; position:relative; max-height:85vh; overflow-y:auto; }
 .col-set { border:1px solid #333; padding:10px; margin-bottom:10px; background:#111; border-radius:4px; }
@@ -289,12 +288,13 @@ async function getAuthHeaders() {
   return { "Content-Type": "application/json", "X-Esc-Device": device, "Authorization": "Bearer " + token };
 }
 
+// ВАЖНО: тут мы больше НЕ выкидываем на экран логина, если 401. Просто пишем в лог.
 async function act(op, params = {}) {
   try {
     const res = await fetch(`${BASE_URL}/escape/act`, {
       method: "POST", headers: await getAuthHeaders(), body: JSON.stringify({ action: { op, ...params } })
     });
-    if (res.status === 401) { logout(); return { ok: false, error: "401" }; }
+    if (res.status === 401) { log("❌ Ошибка 401: Токен неверный!", "error"); return { ok: false, error: "401" }; }
     if (res.status === 429) {
       backoffMs = Math.min(backoffMs + 300, 4000);
       cooldownUntil = Date.now() + backoffMs;
@@ -314,7 +314,7 @@ async function act(op, params = {}) {
 async function getState() {
   try {
     const res = await fetch(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() });
-    if (res.status === 401) { logout(); return null; }
+    if (res.status === 401) { log("❌ Ошибка 401: Токен неверный!", "error"); return null; }
     if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
     const j = await res.json();
     if (j.state && j.state.dayDmg > 0) session.bossDmg = j.state.dayDmg;
@@ -325,7 +325,7 @@ async function getState() {
 async function apiGet(path) {
   try {
     const res = await fetch(`${BASE_URL}${path}`, { headers: await getAuthHeaders() });
-    if (res.status === 401) { logout(); return null; }
+    if (res.status === 401) { log("❌ Ошибка 401: Токен неверный!", "error"); return null; }
     if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
     return await res.json();
   } catch (e) { return null; }
@@ -336,7 +336,7 @@ async function apiPost(path, body = {}) {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST", headers: await getAuthHeaders(), body: JSON.stringify(body)
     });
-    if (res.status === 401) { logout(); return null; }
+    if (res.status === 401) { log("❌ Ошибка 401: Токен неверный!", "error"); return null; }
     if (res.status === 429) { cooldownUntil = Date.now() + 2000; return null; }
     return await res.json();
   } catch (e) { return null; }
@@ -361,7 +361,7 @@ function login() {
   $("ui-nickname").innerText = getNicknameFromToken(token);
   $("auth-screen").style.display = "none";
   $("main-screen").style.display = "block";
-  log("УСПЕШНЫЙ ВХОД. ДОБРО ПОЖАЛОВАТЬ.", "success");
+  log("ПОДКЛЮЧЕНИЕ...", "success");
   startStateLoop();
 }
 
@@ -373,11 +373,12 @@ function logout() {
 }
 
 window.onload = () => {
+  // СТИРАЕМ СТАРЫЕ ДАННЫЕ ПРИ ЗАГРУЗКЕ
+  localStorage.removeItem("force_logout");
   const st = localStorage.getItem("bot_token");
   const sd = localStorage.getItem("bot_device");
-  const forceLogout = localStorage.getItem("force_logout") === "true";
   
-  if (st && sd && !forceLogout) {
+  if (st && sd) {
     $("in-token").value = st;
     $("in-device").value = sd;
     login();
@@ -402,7 +403,7 @@ async function setGoal(goal) {
     return;
   }
   
-  const res = await act("autocfg", { k: "goal", v: goal });
+  const res = await act("autocfg", { auto_cfg: goal });
   if (res && res.ok) {
     log("Тактика изменена на: " + goal, "success");
     if(lastState && lastState.autoCfg) lastState.autoCfg.goal = goal;
@@ -424,11 +425,8 @@ async function changeNickname() {
   }
 }
 
-// ===== ОБЩИЙ РЕЙТИНГ СЕРВЕРА =====
 async function showRating() {
   log("Загрузка рейтинга сервера...", "info");
-  
-  // Запрашиваем оба топа
   const [topKm, topUvazh] = await Promise.all([
     apiGet("/escape/rating"),
     apiGet("/escape/uvazh-rating")
@@ -439,7 +437,6 @@ async function showRating() {
   let html = '<div class="col-modal-box metal-panel">';
   html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
   
-  // Топ по КМ
   html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:10px;">🏆 ТОП ПО КИЛОМЕТРАМ</h2>';
   if (topKm.players && topKm.players.length) {
     topKm.players.slice(0, 10).forEach((p, i) => {
@@ -455,7 +452,6 @@ async function showRating() {
     html += '<div style="text-align:center;padding:10px;color:#777;">Нет данных</div>';
   }
 
-  // Топ по Уважухе
   html += '<h2 style="color:var(--accent-green);text-align:center;margin:20px 0 10px;">💚 ТОП ПО УВАЖУХЕ</h2>';
   if (topUvazh.rows && topUvazh.rows.length) {
     topUvazh.rows.slice(0, 10).forEach((p, i) => {
