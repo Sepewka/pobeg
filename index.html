@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ESCAPE TERMINAL v35</title>
+<title>ESCAPE TERMINAL v37</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{--bg-color:#0d0d0d;--panel-bg:#151515;--border-color:#333;--text-main:#c4c4c4;--text-muted:#6e6e6e;
@@ -288,13 +288,28 @@ async function getAuthHeaders() {
   return { "Content-Type": "application/json", "X-Esc-Device": device, "Authorization": "Bearer " + token };
 }
 
-// ВАЖНО: тут мы больше НЕ выкидываем на экран логина, если 401. Просто пишем в лог.
+// ТАЙМАУТ НА ЗАПРОС
+const TIMEOUT = 5000;
+async function fetchWithTimeout(url, options) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), TIMEOUT);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return res;
+  } catch (e) {
+    clearTimeout(id);
+    return null;
+  }
+}
+
 async function act(op, params = {}) {
   try {
-    const res = await fetch(`${BASE_URL}/escape/act`, {
+    const res = await fetchWithTimeout(`${BASE_URL}/escape/act`, {
       method: "POST", headers: await getAuthHeaders(), body: JSON.stringify({ action: { op, ...params } })
     });
-    if (res.status === 401) { log("❌ Ошибка 401: Токен неверный!", "error"); return { ok: false, error: "401" }; }
+    if (!res) { log("Таймаут запроса (сервер не отвечает)", "error"); return { ok: false, error: "Timeout" }; }
+    if (res.status === 401) { log("Ошибка 401: Токен неверный!", "error"); return { ok: false, error: "401" }; }
     if (res.status === 429) {
       backoffMs = Math.min(backoffMs + 300, 4000);
       cooldownUntil = Date.now() + backoffMs;
@@ -313,8 +328,9 @@ async function act(op, params = {}) {
 
 async function getState() {
   try {
-    const res = await fetch(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() });
-    if (res.status === 401) { log("❌ Ошибка 401: Токен неверный!", "error"); return null; }
+    const res = await fetchWithTimeout(`${BASE_URL}/escape/state`, { headers: await getAuthHeaders() });
+    if (!res) { log("Таймаут запроса данных (сервер не отвечает)", "error"); return null; }
+    if (res.status === 401) { log("Ошибка 401: Токен неверный!", "error"); return null; }
     if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
     const j = await res.json();
     if (j.state && j.state.dayDmg > 0) session.bossDmg = j.state.dayDmg;
@@ -324,8 +340,9 @@ async function getState() {
 
 async function apiGet(path) {
   try {
-    const res = await fetch(`${BASE_URL}${path}`, { headers: await getAuthHeaders() });
-    if (res.status === 401) { log("❌ Ошибка 401: Токен неверный!", "error"); return null; }
+    const res = await fetchWithTimeout(`${BASE_URL}${path}`, { headers: await getAuthHeaders() });
+    if (!res) return null;
+    if (res.status === 401) return null;
     if (res.status === 429) { cooldownUntil = Date.now() + 1000; return null; }
     return await res.json();
   } catch (e) { return null; }
@@ -333,13 +350,21 @@ async function apiGet(path) {
 
 async function apiPost(path, body = {}) {
   try {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await fetchWithTimeout(`${BASE_URL}${path}`, {
       method: "POST", headers: await getAuthHeaders(), body: JSON.stringify(body)
     });
-    if (res.status === 401) { log("❌ Ошибка 401: Токен неверный!", "error"); return null; }
+    if (!res) return null;
+    if (res.status === 401) return null;
     if (res.status === 429) { cooldownUntil = Date.now() + 2000; return null; }
     return await res.json();
   } catch (e) { return null; }
+}
+
+function forceLogout(reason) {
+  alert(reason);
+  localStorage.clear(); 
+  localStorage.setItem("force_logout", "true"); 
+  location.reload(); 
 }
 
 function getNicknameFromToken(jwt) {
@@ -373,7 +398,6 @@ function logout() {
 }
 
 window.onload = () => {
-  // СТИРАЕМ СТАРЫЕ ДАННЫЕ ПРИ ЗАГРУЗКЕ
   localStorage.removeItem("force_logout");
   const st = localStorage.getItem("bot_token");
   const sd = localStorage.getItem("bot_device");
