@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ESCAPE TERMINAL v54</title>
+<title>ESCAPE TERMINAL v57</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -86,6 +86,7 @@ h1, .panel-title, .stat-label, .btn, .status-badge, .log-time { font-family: 'VT
 .stat-box { background: #0a0b0e; border: 1px solid #2a303d; padding: 8px 6px; text-align: center; border-radius: 6px; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5); min-width: 0; }
 .stat-label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stat-val { font-size: 20px; color: #fff; line-height: 1.2; margin-top: 6px; text-shadow: 0 0 8px rgba(255, 255, 255, 0.2); font-family: 'Share Tech Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-sub { font-size: 12px; color: var(--accent-yellow); margin-top: 4px; font-family: 'Share Tech Mono', monospace; font-weight: bold; }
 .stat-box.highlight .stat-val { color: var(--accent-yellow); text-shadow: 0 0 8px rgba(240, 173, 78, 0.4); }
 .stat-box.run .stat-val { color: var(--accent-green); text-shadow: 0 0 8px rgba(92, 184, 92, 0.4); }
 .stat-box.boss .stat-val { color: var(--accent-red); text-shadow: 0 0 8px rgba(217, 83, 79, 0.4); }
@@ -124,16 +125,16 @@ h1, .panel-title, .stat-label, .btn, .status-badge, .log-time { font-family: 'VT
 
 /* Статистика сессии */
 .session-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-.sess-card { display: flex; align-items: center; gap: 8px; background: #111318; border: 1px solid #252c38; padding: 8px; border-radius: 6px; }
-.sess-ico { font-size: 20px; filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.1)); }
-.sess-info { display: flex; flex-direction: column; min-width: 0; }
+.sess-card { display: flex; align-items: center; gap: 8px; background: #111318; border: 1px solid #252c38; padding: 8px; border-radius: 6px; min-width: 0; }
+.sess-ico { font-size: 20px; filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.1)); flex-shrink: 0; }
+.sess-info { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 .sess-info span { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sess-info b { font-size: 16px; color: #fff; font-family: 'Share Tech Mono', monospace; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sess-info b.hl { color: var(--accent-green); text-shadow: 0 0 6px rgba(92, 184, 92, 0.4); }
 
 /* Итоги за день */
 .day-summary { margin-top: 8px; border-top: 1px dashed #252c38; padding-top: 8px; display: flex; flex-direction: column; gap: 4px; }
-.day-res-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; background: #111318; padding: 4px 8px; border-radius: 4px; border: 1px solid #252c38; min-width: 0; }
+.day-res-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; background: #111318; padding: 4px 8px; border-radius: 4px; border: 1px solid #252c38; min-width: 0; overflow: hidden; }
 .day-res-row span { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
 .day-res-row b { white-space: nowrap; font-family: 'Share Tech Mono', monospace; }
 .day-res-row b.plus { color: var(--accent-green); }
@@ -292,9 +293,9 @@ details.cfg-details[open] summary { border-bottom: 1px dashed #2a303d; }
     <div class="panel-title"><span>ОПЕРАТИВНАЯ СВОДКА</span><span id="ui-status" class="status-badge status-stop">ОСТАНОВЛЕН</span></div>
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-label">КМ за сегодня</div><div class="stat-val" id="ui-day-km" style="color:var(--accent-yellow)">0</div></div>
-      <div class="stat-box run"><div class="stat-label">Текущий км</div><div class="stat-val" id="ui-cur-km">0</div></div>
+      <div class="stat-box run"><div class="stat-label">Текущий км</div><div class="stat-val" id="ui-cur-km">0</div><div class="stat-sub" id="ui-run-time">00:00</div></div>
       <div class="stat-box boss"><div class="stat-label">Урон Боссу</div><div class="stat-val" id="ui-boss-dmg">0</div></div>
-      <div class="stat-box"><div class="stat-label">Забеги (всего)</div><div class="stat-val" id="ui-runs">0</div></div>
+      <div class="stat-box"><div class="stat-label">Забеги (день)</div><div class="stat-val" id="ui-runs">0/50</div></div>
     </div>
   </div>
 
@@ -405,6 +406,10 @@ details.cfg-details[open] summary { border-bottom: 1px dashed #2a303d; }
     <div class="panel-title">СТАТИСТИКА СЕССИИ (БОТА)</div>
     <div class="session-stats">
       <div class="sess-card">
+        <div class="sess-ico">⏱️</div>
+        <div class="sess-info"><span>Время сессии</span><b id="sess-time" class="hl">00:00:00</b></div>
+      </div>
+      <div class="sess-card">
         <div class="sess-ico">🏃</div>
         <div class="sess-info"><span>Забегов</span><b id="sess-runs" class="hl">0</b></div>
       </div>
@@ -455,16 +460,34 @@ let session = { runs: 0, km: 0, help: 0, bossDmg: 0, startTime: 0, helpStats: {}
 
 let failedHelps = {}; 
 let currentHistDay = null;
+let wakeLock = null;
 
-// Функция для сокращения больших чисел (454K, 8.6B)
+// Форматирование чисел (8.5B, 1.2M, 5K)
+const numFormatter = new Intl.NumberFormat('ru-RU', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 1
+});
+
 function fmtNum(num) {
     if (!num || num === 0) return "0";
-    const abs = Math.abs(num);
-    if (abs < 1000) return num.toString();
-    if (abs < 1000000) return (num / 1000).toFixed(abs >= 100000 ? 0 : 1).replace(/\.0$/, '') + "K";
-    if (abs < 1000000000) return (num / 1000000).toFixed(abs >= 100000000 ? 0 : 1).replace(/\.0$/, '') + "M";
-    if (abs < 1000000000000) return (num / 1000000000).toFixed(abs >= 100000000000 ? 0 : 1).replace(/\.0$/, '') + "B";
-    return (num / 1000000000000).toFixed(1).replace(/\.0$/, '') + "T";
+    return numFormatter.format(num);
+}
+
+function formatDuration(ms) {
+    if (!ms || ms < 0) return "00:00";
+    let sec = Math.floor(ms / 1000);
+    let h = Math.floor(sec / 3600);
+    let m = Math.floor((sec % 3600) / 60);
+    let s = sec % 60;
+    return (h > 0 ? String(h).padStart(2, '0') + ":" : "") + 
+           String(m).padStart(2, '0') + ":" + 
+           String(s).padStart(2, '0');
+}
+
+// Глобальное закрытие модалок, чтобы не было серого экрана
+function closeModals() {
+    document.querySelectorAll('.col-modal-bg').forEach(el => el.remove());
 }
 
 function getLocalDayStr(ts) {
@@ -493,6 +516,29 @@ function loadSession() {
 function saveSession() {
     localStorage.setItem('bot_session', JSON.stringify(session));
 }
+
+// ========== WAKE LOCK API (Не даем экрану погаснуть) ==========
+async function requestWakeLock() {
+    try {
+        if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            log("🔒 Экран заблокирован от сна (бот работает)", "info");
+        }
+    } catch (err) {
+        log("Wake Lock не поддерживается браузером", "warn");
+    }
+}
+requestWakeLock();
+
+document.addEventListener('visibilitychange', async () => {
+    if (wakeLock !== null && document.visibilityState === 'visible') {
+        await requestWakeLock();
+    }
+    if (document.visibilityState === 'visible' && isRunning && !isPaused) {
+        // Принудительно возобновляем цикл при возврате на вкладку
+        setTimeout(runLoop, 100);
+    }
+});
 
 // ========== СТАТИСТИКА ==========
 let statsData = {
@@ -553,6 +599,21 @@ function updateAdminStats() {
     $("stat-err").innerText = statsData.errors; $("stat-rpm").innerText = statsRpm();
     $("stat-rph").innerText = statsRph();
 }
+
+// Обновление таймеров на экране каждую секунду
+setInterval(() => {
+    if (!lastState) return;
+    let sessTime = Date.now() - session.startTime;
+    let sEl = $("sess-time");
+    if (sEl) sEl.innerText = formatDuration(sessTime);
+    
+    let runTime = 0;
+    if (lastState.run && lastState.run.startedAt) {
+        runTime = Date.now() - lastState.run.startedAt;
+    }
+    let rEl = $("ui-run-time");
+    if (rEl) rEl.innerText = formatDuration(runTime);
+}, 1000);
 
 // ========== НАСТРОЙКИ ==========
 const FINE_TUNE_CFG = {
@@ -859,7 +920,6 @@ function renderDaySummary(state) {
 }
 
 function getTodayKm(state) {
-    // Берем напрямую из API игры
     return state.dayKm || 0;
 }
 
@@ -886,7 +946,7 @@ async function showRating() {
     const [topKm, topUvazh] = await Promise.all([ apiGet("/escape/rating"), apiGet("/escape/uvazh-rating") ]);
     if (!topKm || !topUvazh) return log("Не удалось загрузить рейтинг", "error");
     let html = '<div class="col-modal-box metal-panel">';
-    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<button onclick="closeModals()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
     html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:8px;font-family:\'VT323\',monospace;letter-spacing:2px;font-size:20px;">🏆 ТОП ПО КИЛОМЕТРАМ</h2>';
     if (topKm.players && topKm.players.length) {
         topKm.players.slice(0,10).forEach((p,i)=>{
@@ -928,8 +988,12 @@ function showHistory() {
         else currentHistDay = Object.keys(byDay).sort().reverse()[0];
     }
 
-    let html = '<div class="col-modal-bg" onclick="if(event.target===this) this.remove()"><div class="col-modal-box metal-panel hist" style="max-height: 86vh; width: min(96vw, 460px);">';
-    html += '<div class="panel-title" style="margin:-12px -12px 12px -12px; font-size:18px;">📜 ЖУРНАЛ ЗАБЕГОВ</div>';
+    let html = '<div class="col-modal-bg" onclick="if(event.target===this) closeModals()"><div class="col-modal-box metal-panel hist" style="max-height: 86vh; width: min(96vw, 460px);">';
+    
+    html += '<div class="panel-title" style="margin:-12px -12px 12px -12px; font-size:18px; display:flex; justify-content:space-between; align-items:center;">';
+    html += '<span>📜 ЖУРНАЛ ЗАБЕГОВ</span>';
+    html += '<button onclick="closeModals()" style="background:none;border:none;color:#8b1a1a;font-size:20px;cursor:pointer;padding:0 5px;font-weight:bold;">✖</button>';
+    html += '</div>';
     
     html += '<div class="esc-hist-tabs">';
     const tabs = [
@@ -1003,9 +1067,13 @@ function showHistory() {
         for (let r of runs) {
             const time = new Date(r.t).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
             
-            html += '<div class="esc-hist-card">';
-            html += '<div class="esc-hist-head">';
-            html += `<span class="esc-hist-km">${r.km} КМ</span>`;
+            let durationStr = "";
+            if (r.startedAt && r.t) {
+                durationStr = `⏱ ${formatDuration(r.t - r.startedAt)}`;
+            }
+
+            html += '<details class="esc-hist-card" style="padding:0;"><summary style="padding:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; list-style:none; outline:none;">';
+            html += `<div style="display:flex; gap:8px; align-items:center;"><span class="esc-hist-km">${r.km} КМ</span>`;
             if (r.stop) {
                 const stopFoes = r.stop.foes || [];
                 if (stopFoes.length) {
@@ -1014,11 +1082,13 @@ function showHistory() {
                     html += `<span class="esc-hist-stop-pill">${emoji} ${name} - не убили</span>`;
                 }
             }
-            html += `<span class="esc-hist-time" style="margin-left:auto; font-weight:800; font-size:12px; color:#6b5129;">${time}</span>`;
-            html += '</div>';
+            html += `</div><div style="display:flex; gap:8px; align-items:center;"><span class="esc-hist-time" style="font-weight:800; font-size:12px; color:#6b5129;">${durationStr}</span><span class="esc-hist-time" style="font-weight:800; font-size:12px; color:#6b5129;">${time} ▼</span></div>`;
+            html += '</summary>';
+            
+            html += '<div style="padding:0 8px 8px 8px; border-top:1px dashed #c9b07a;">';
             
             if (r.squad) {
-                html += '<div class="esc-hist-squad">';
+                html += '<div class="esc-hist-squad" style="margin-top:6px;">';
                 for (let pos in r.squad) {
                     const fId = r.squad[pos];
                     if (fId) {
@@ -1097,7 +1167,7 @@ function showHistory() {
                 html += `<div class="esc-hist-items">🎁 Шмоток и наколок: ${r.items.length}</div>`;
             }
             
-            html += '</div>';
+            html += '</div></details>';
         }
     } else {
         html += '<div style="text-align:center;padding:16px;color:#5d4a2a;font-size:13px;">В этот день забегов не было.</div>';
@@ -1105,7 +1175,7 @@ function showHistory() {
     
     html += '</div></div>';
     
-    document.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); 
+    closeModals(); 
     const modal = document.createElement("div"); 
     modal.className = "col-modal-bg"; 
     modal.innerHTML = html; 
@@ -1115,7 +1185,7 @@ function showHistory() {
 function openGangMenu() {
     const st = lastState; if (!st || !st.fighters) return log("Нет данных о бойцах", "error");
     let html = '<div class="col-modal-box metal-panel" style="max-height:80vh; overflow-y:auto;">';
-    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<button onclick="closeModals()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
     html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:12px;">БАНДА</h2>';
     const fighters = Object.entries(st.fighters).sort((a,b)=>{
         if (a[1].owned && !b[1].owned) return -1; if (!a[1].owned && b[1].owned) return 1; return (b[1].lvl||0) - (a[1].lvl||0);
@@ -1143,7 +1213,7 @@ async function doKach(fid) {
     if (res && res.ok) {
         log(`✅ Успешно прокачан ${FIGHTER_NAMES[fid]||fid}!`, "success");
         const st = await getState(); if (st) { lastState = st; updateUI(); }
-        document.body.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); setTimeout(openGangMenu, 100);
+        closeModals(); setTimeout(openGangMenu, 100);
     } else {
         const errMsg = res?.message || res?.error || "Неизвестная ошибка";
         log(`❌ Ошибка: ${errMsg}`, "error"); alert(`Ошибка прокачки: ${errMsg}`);
@@ -1155,7 +1225,7 @@ async function doBuyFighter(fid) {
     if (res && res.ok) {
         log(`✅ ${FIGHTER_NAMES[fid]||fid} куплен!`, "success");
         const st = await getState(); if (st) { lastState = st; updateUI(); }
-        document.body.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); setTimeout(openGangMenu, 100);
+        closeModals(); setTimeout(openGangMenu, 100);
     } else {
         const errMsg = res?.message || res?.error || "Неизвестная ошибка";
         log(`❌ Ошибка покупки: ${errMsg}`, "error"); alert(`Ошибка покупки: ${errMsg}`);
@@ -1165,7 +1235,7 @@ async function doBuyFighter(fid) {
 function openCollections() {
     if (!lastState || !lastState.items) return log("Нет данных об инвентаре", "error");
     let html = '<div class="col-modal-box metal-panel">';
-    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<button onclick="closeModals()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
     html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:12px;">ТВОИ КОЛЛЕКЦИИ</h2>';
     let hasItems = false;
     for (const [setId, info] of Object.entries(SETS_INFO)) {
@@ -1193,7 +1263,7 @@ async function sellSet(setId, count) {
     const res = await act("sellset", { k:setId, n:count });
     if (res && (res.ok || res.success || res.sold)) {
         log(`Успешно сдано: ${setName}`, "success");
-        document.body.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); setTimeout(openCollections, 100);
+        closeModals(); setTimeout(openCollections, 100);
     } else log("Ошибка сдачи: " + (res?.message || res?.error || "неизвестная"), "error");
 }
 
@@ -1215,12 +1285,10 @@ function updateUI() {
     $("ui-uvazh").innerText = mySeasonUvazh !== null ? fmtNum(mySeasonUvazh) : fmtNum(st.stats?.uvazh || st.uvazh || 0);
     
     const attempts = st.daily?.attempts || 0; const maxRuns = 50 + (st.daily?.extra || 0);
-    // Показываем реальное количество забегов из статистики (как на скрине)
-    $("ui-runs").innerText = fmtNum(st.stats?.runs || 0); 
+    $("ui-runs").innerText = `${attempts}/${maxRuns}`;
     
     $("ui-cur-km").innerText = fmtNum(st.run ? st.run.km : 0);
     
-    // Берем км за сегодня напрямую из API
     $("ui-day-km").innerText = fmtNum(st.dayKm || 0);
     
     $("ui-boss-dmg").innerText = fmtNum(st.dayDmg || 0);
@@ -1394,15 +1462,31 @@ async function bossLoop() {
     const data = await refreshBossInfo(); if (!data) { setTimeout(bossLoop, 2000); return; }
     if (data.killed) { log("✅ СМОТРИТЕЛЬ МЕРТВ", "success"); stopBoss(); return; }
     let tapsLeft = data.me?.taps_left || 0; if (tapsLeft <= 0) { log("Нет тыков", "warn"); stopBoss(); return; }
-    let delay = 40;
+    
+    let delay = 10;
     while (tapsLeft > 0 && isBossHitting) {
-        const batch = Math.min(500, tapsLeft); const r = await apiPost("/escape/daily-boss/tap", { count:batch });
+        const batch = Math.min(500, tapsLeft);
+        const r = await apiPost("/escape/daily-boss/tap", { count:batch });
+        
         if (!r) { await new Promise(res=>setTimeout(res, 1000)); continue; }
-        if (r.error === "429" || (r.message && r.message.includes("429")) || r.error === "cooldown") { delay = Math.min(delay + 100, 1000); log("Сервер притормаживает...", "warn"); await new Promise(res=>setTimeout(res, delay)); continue; }
+        
+        if (r.error === "429" || (r.message && r.message.includes("429")) || r.error === "cooldown") { 
+            delay = Math.min(delay * 2, 5000);
+            const jitter = Math.random() * 500;
+            log(`Сервер притормаживает... пауза ${Math.round((delay+jitter)/1000)}с`, "warn"); 
+            await new Promise(res=>setTimeout(res, delay + jitter)); 
+            continue; 
+        }
+        
         if (!r.success && !r.ok) { log("Тык: " + (r.message || r.error || "?"), "error"); break; }
-        delay = Math.max(20, delay - 10); tapsLeft = r.me?.taps_left || 0; const dmg = r.me?.damage || 0;
+        
+        delay = Math.max(10, delay - 50);
+        
+        tapsLeft = r.me?.taps_left || 0; 
+        const dmg = r.me?.damage || 0;
         session.bossDmg = dmg; updateSessionUI(); $("ui-boss-dmg").innerText = fmtNum(dmg);
         $("boss-info").innerHTML = `Тыки: <b style="color:var(--accent-yellow)">${tapsLeft}</b> · Урон: <b>${fmtNum(dmg)}</b>`;
+        
         if (r.killed) { log("✅ СМОТРИТЕЛЬ ПОВЕРЖЕН", "success"); stopBoss(); return; }
         await new Promise(res=>setTimeout(res, delay));
     }
@@ -1441,7 +1525,7 @@ function updateFineTuneBtns(key, val) {
 function openFineTune() {
     if (!lastState) return log("Нет данных", "error");
     let html = '<div class="col-modal-box metal-panel" style="max-height:80vh; overflow-y:auto;">';
-    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<button onclick="closeModals()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
     html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:8px;font-family:\'VT323\',monospace;letter-spacing:2px;font-size:22px;">⚙ ТОНКАЯ НАСТРОЙКА</h2>';
     html += '<div style="text-align:center;font-size:13px;color:var(--text-muted);margin-bottom:12px;">Нажми на название, чтобы раскрыть описание и увидеть кнопки.</div>';
     
@@ -1486,7 +1570,7 @@ function pct(a, b) { return b > 0 ? Math.round(a/b*1000)/10 : 0; }
 function buildStatsReport() {
     const el = (Date.now() - statsData.sessionStart) / 60000; const avgPing = statsAvgPing();
     const errPct = pct(statsData.errors, statsData.total); const expPct = pct(statsData.expectedErrors, statsData.total);
-    let txt = `=== СТАТИСТИКА БОТА v54 ===\n`;
+    let txt = `=== СТАТИСТИКА БОТА v57 ===\n`;
     txt += `Сессия: ${Math.round(el)} мин\nСредний пинг: ${avgPing} мс\nВсего запросов: ${statsData.total}\n`;
     txt += `Реальных ошибок: ${statsData.errors} (${errPct}%)\nОжидаемых 400: ${statsData.expectedErrors} (${expPct}%)\n`;
     txt += `Скорость сейчас: ${statsRpm()}/мин, ${statsRph()}/час\nСредняя за сессию: ${statsAvgRpm()}/мин\n\n`;
@@ -1510,7 +1594,7 @@ function showStats() {
     const errPct = pct(statsData.errors, statsData.total); const expPct = pct(statsData.expectedErrors, statsData.total);
 
     let html = '<div class="col-modal-box metal-panel wide" style="max-height:85vh; overflow-y:auto;">';
-    html += '<button onclick="this.parentNode.parentNode.remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
+    html += '<button onclick="closeModals()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
     html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:8px;font-family:\'VT323\',monospace;letter-spacing:2px;font-size:20px;">📊 СТАТИСТИКА ЗАПРОСОВ</h2>';
 
     html += '<div class="stats-summary">';
@@ -1569,7 +1653,7 @@ function resetStats() {
     if (!confirm("Сбросить всю статистику запросов?")) return;
     statsData = { total:0, errors:0, expectedErrors:0, pings:[], sessionStart: Date.now(), endpoints:{}, perMinute:{}, perHour:{}, recentErrors:[] };
     updateAdminStats(); log("📊 Статистика сброшена", "info");
-    document.querySelectorAll('.col-modal-bg').forEach(el=>el.remove()); showStats();
+    closeModals(); showStats();
 }
 
 setInterval(updateAdminStats, 5000);
