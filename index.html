@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ESCAPE TERMINAL v57</title>
+<title>ESCAPE TERMINAL v58</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -224,6 +224,18 @@ details.cfg-details[open] summary { border-bottom: 1px dashed #2a303d; }
 .esc-hist-items { font-size: 11px; font-weight: 700; color: #6b3a00; margin-top: 6px; text-align: center; }
 .esc-hist-kills-label { font-size: 10px; font-weight: 900; letter-spacing: 0.6px; text-transform: uppercase; color: #a08050; margin: 6px 0 4px; text-align: center; }
 .esc-hist-sum .esc-hist-kills-label { color: #d7c49e; }
+
+/* КОЛЛЕКЦИИ */
+.col-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.col-tab { flex: 1; padding: 8px; text-align: center; background: #111318; border: 1px solid #333b4a; border-radius: 6px; color: #aaa; cursor: pointer; font-family: 'VT323', monospace; font-size: 16px; }
+.col-tab.on { background: var(--accent-blue); border-color: #4a80a0; color: #fff; font-weight: bold; box-shadow: 0 0 10px rgba(51, 122, 183, 0.4); }
+.menyala-box { background: #111318; border: 1px solid #333b4a; border-radius: 6px; padding: 12px; text-align: center; }
+.menyala-title { font-size: 18px; color: #fff; font-family: 'VT323', monospace; margin-bottom: 4px; }
+.menyala-hint { font-size: 13px; color: #aaa; margin-bottom: 12px; }
+.menyala-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #333b4a; }
+.menyala-row:last-child { border-bottom: none; }
+.menyala-name { font-size: 16px; color: #fff; font-weight: bold; }
+.menyala-type { font-size: 12px; color: #aaa; }
 
 @media (max-width: 480px) {
     body { padding: 8px; padding-bottom: 50px; }
@@ -461,6 +473,7 @@ let session = { runs: 0, km: 0, help: 0, bossDmg: 0, startTime: 0, helpStats: {}
 let failedHelps = {}; 
 let currentHistDay = null;
 let wakeLock = null;
+let colTab = 'sets'; // Для вкладок коллекций
 
 // Форматирование чисел (8.5B, 1.2M, 5K)
 const numFormatter = new Intl.NumberFormat('ru-RU', {
@@ -472,6 +485,12 @@ const numFormatter = new Intl.NumberFormat('ru-RU', {
 function fmtNum(num) {
     if (!num || num === 0) return "0";
     return numFormatter.format(num);
+}
+
+// Полные числа с пробелами (1 234)
+function fmtFull(num) {
+    if (!num || num === 0) return "0";
+    return num.toLocaleString('ru-RU');
 }
 
 function formatDuration(ms) {
@@ -535,7 +554,6 @@ document.addEventListener('visibilitychange', async () => {
         await requestWakeLock();
     }
     if (document.visibilityState === 'visible' && isRunning && !isPaused) {
-        // Принудительно возобновляем цикл при возврате на вкладку
         setTimeout(runLoop, 100);
     }
 });
@@ -952,7 +970,8 @@ async function showRating() {
         topKm.players.slice(0,10).forEach((p,i)=>{
             const isMe = (p.display_name === myDisplayName) || (p.login === myLogin);
             const place = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
-            html += `<div class="rating-row ${isMe?'me':''}"><span class="rating-place">${place}</span><span class="rating-name">${p.display_name||p.login}</span><span class="rating-val">${fmtNum(p.record_km||0)}</span></div>`;
+            // Используем fmtFull для полных километров
+            html += `<div class="rating-row ${isMe?'me':''}"><span class="rating-place">${place}</span><span class="rating-name">${p.display_name||p.login}</span><span class="rating-val">${fmtFull(p.record_km||0)}</span></div>`;
         });
     } else html += '<div style="text-align:center;padding:10px;color:#777;">Нет данных</div>';
     html += '<h2 style="color:var(--accent-green);text-align:center;margin:16px 0 8px;font-family:\'VT323\',monospace;letter-spacing:2px;font-size:20px;">💚 ТОП ПО УВАЖУХЕ</h2>';
@@ -1067,6 +1086,7 @@ function showHistory() {
         for (let r of runs) {
             const time = new Date(r.t).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
             
+            // Форматирование времени забега
             let durationStr = "";
             if (r.startedAt && r.t) {
                 durationStr = `⏱ ${formatDuration(r.t - r.startedAt)}`;
@@ -1232,29 +1252,93 @@ async function doBuyFighter(fid) {
     }
 }
 
+// ========== КОЛЛЕКЦИИ ==========
 function openCollections() {
-    if (!lastState || !lastState.items) return log("Нет данных об инвентаре", "error");
+    if (!lastState) return log("Нет данных", "error");
     let html = '<div class="col-modal-box metal-panel">';
     html += '<button onclick="closeModals()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:red;font-size:20px;cursor:pointer;">✖</button>';
-    html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:12px;">ТВОИ КОЛЛЕКЦИИ</h2>';
-    let hasItems = false;
-    for (const [setId, info] of Object.entries(SETS_INFO)) {
-        let minCount = Infinity;
-        for (let i=0; i<info.pieces; i++) { const c = lastState.items[`${setId}:${i}`] || 0; if (c < minCount) minCount = c; }
-        if (minCount === Infinity) minCount = 0;
-        let totalParts = 0; for (let i=0; i<info.pieces; i++) totalParts += (lastState.items[`${setId}:${i}`] || 0);
-        if (totalParts > 0) {
-            hasItems = true;
-            html += `<div class="col-set"><b>${info.name}</b><span>Деталей: ${totalParts} | Готовых сетов: ${minCount}</span><div class="col-btn-row">`;
-            if (minCount > 0) {
-                html += `<button class="btn btn-info sm" onclick="sellSet('${setId}', 1)">Сдать 1</button>`;
-                if (minCount > 1) html += `<button class="btn btn-warning sm" onclick="sellSet('${setId}', ${minCount})">Сдать все (${minCount})</button>`;
-            } else html += `<span style="color:#627080; font-size:13px;">Нужно собрать все 5 деталей</span>`;
-            html += `</div></div>`;
+    html += '<h2 style="color:var(--accent-yellow);text-align:center;margin-bottom:12px;">КОЛЛЕКЦИИ</h2>';
+    
+    // Вкладки
+    html += `<div class="col-tabs">
+        <div class="col-tab ${colTab === 'sets' ? 'on' : ''}" onclick="colTab='sets'; openCollections();">Наборы</div>
+        <div class="col-tab ${colTab === 'menyala' ? 'on' : ''}" onclick="colTab='menyala'; openCollections();">Меняла</div>
+    </div>`;
+
+    if (colTab === 'sets') {
+        let hasItems = false;
+        for (const [setId, info] of Object.entries(SETS_INFO)) {
+            let minCount = Infinity;
+            for (let i=0; i<info.pieces; i++) { const c = lastState.items[`${setId}:${i}`] || 0; if (c < minCount) minCount = c; }
+            if (minCount === Infinity) minCount = 0;
+            let totalParts = 0; for (let i=0; i<info.pieces; i++) totalParts += (lastState.items[`${setId}:${i}`] || 0);
+            if (totalParts > 0) {
+                hasItems = true;
+                html += `<div class="col-set"><b>${info.name}</b><span>Деталей: ${totalParts} | Готовых сетов: ${minCount}</span><div class="col-btn-row">`;
+                if (minCount > 0) {
+                    html += `<button class="btn btn-info sm" onclick="sellSet('${setId}', 1)">Сдать 1</button>`;
+                    if (minCount > 1) html += `<button class="btn btn-warning sm" onclick="sellSet('${setId}', ${minCount})">Сдать все (${minCount})</button>`;
+                } else html += `<span style="color:#627080; font-size:13px;">Нужно собрать все 5 деталей</span>`;
+                html += `</div></div>`;
+            }
         }
+        if (!hasItems) html += '<div style="text-align:center;padding:16px;color:#627080;">У тебя нет деталей коллекций.</div>';
+    } else {
+        // Вкладка Меняла
+        const tainiki = getRes('tainiki');
+        const cost = 200;
+        const maxTrade = Math.floor(tainiki / cost);
+        
+        html += `<div class="menyala-box">
+            <div class="menyala-title">МЕНЯЛА</div>
+            <div class="menyala-hint">Обмен за ${cost} ${RES_ICONS['tainiki']} (у вас ${fmtNum(tainiki)})</div>
+            <div style="font-size:13px;color:#aaa;margin-bottom:12px;">Сразу открывается приз из выбранного набора</div>`;
+            
+        html += `<div class="menyala-row">
+            <div style="text-align:left;">
+                <div class="menyala-name">«Долгий день»</div>
+                <div class="menyala-type">шмотки</div>
+            </div>
+            <div style="display:flex; gap:4px;">
+                <button class="btn btn-primary sm" onclick="doMenyala('dolgiy')" ${maxTrade < 1 ? 'disabled' : ''}>Обменять</button>
+                <button class="btn btn-warning sm" onclick="doMenyala('dolgiy', ${maxTrade})" ${maxTrade < 2 ? 'disabled' : ''}>ВСЕ</button>
+            </div>
+        </div>`;
+
+        html += `<div class="menyala-row">
+            <div style="text-align:left;">
+                <div class="menyala-name">«Нибелунги»</div>
+                <div class="menyala-type">наколки</div>
+            </div>
+            <div style="display:flex; gap:4px;">
+                <button class="btn btn-primary sm" onclick="doMenyala('nibelungi')" ${maxTrade < 1 ? 'disabled' : ''}>Обменять</button>
+                <button class="btn btn-warning sm" onclick="doMenyala('nibelungi', ${maxTrade})" ${maxTrade < 2 ? 'disabled' : ''}>ВСЕ</button>
+            </div>
+        </div>`;
+        
+        html += `</div>`;
     }
-    if (!hasItems) html += '<div style="text-align:center;padding:16px;color:#627080;">У тебя нет деталей коллекций.</div>';
-    html += '</div>'; const modal = document.createElement("div"); modal.className = "col-modal-bg"; modal.innerHTML = html; document.body.appendChild(modal);
+
+    html += '</div>'; 
+    const modal = document.createElement("div"); 
+    modal.className = "col-modal-bg"; 
+    modal.innerHTML = html; 
+    document.body.appendChild(modal);
+}
+
+async function doMenyala(setType, count = 1) {
+    if (count < 1) return;
+    const setName = setType === 'dolgiy' ? 'Долгий день' : 'Нибелунги';
+    log(`Обмен тайников: ${setName} x${count}...`, "warn");
+    const res = await act("menyalabuy", { k: setType, n: count });
+    if (res && res.ok) {
+        log(`✅ Успешный обмен: ${setName} x${count}`, "success");
+        const st = await getState(); if (st) { lastState = st; updateUI(); }
+        closeModals(); setTimeout(openCollections, 100);
+    } else {
+        const errMsg = res?.message || res?.error || "Неизвестная ошибка";
+        log(`❌ Ошибка обмена: ${errMsg}`, "error");
+    }
 }
 
 async function sellSet(setId, count) {
@@ -1570,7 +1654,7 @@ function pct(a, b) { return b > 0 ? Math.round(a/b*1000)/10 : 0; }
 function buildStatsReport() {
     const el = (Date.now() - statsData.sessionStart) / 60000; const avgPing = statsAvgPing();
     const errPct = pct(statsData.errors, statsData.total); const expPct = pct(statsData.expectedErrors, statsData.total);
-    let txt = `=== СТАТИСТИКА БОТА v57 ===\n`;
+    let txt = `=== СТАТИСТИКА БОТА v58 ===\n`;
     txt += `Сессия: ${Math.round(el)} мин\nСредний пинг: ${avgPing} мс\nВсего запросов: ${statsData.total}\n`;
     txt += `Реальных ошибок: ${statsData.errors} (${errPct}%)\nОжидаемых 400: ${statsData.expectedErrors} (${expPct}%)\n`;
     txt += `Скорость сейчас: ${statsRpm()}/мин, ${statsRph()}/час\nСредняя за сессию: ${statsAvgRpm()}/мин\n\n`;
